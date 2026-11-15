@@ -1,0 +1,10 @@
+#include "Shared.xcconfig"
+#include "Backend-Prod.xcconfig"
+
+APP_ENV = prod
+APP_BUNDLE_IDENTIFIER = com.lequangtrongtai.roll36
+APP_DISPLAY_NAME = ROLL36
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+CODE_SIGN_ENTITLEMENTS = Config/Entitlements/ROLL36-Prod.entitlements
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) PROD
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
