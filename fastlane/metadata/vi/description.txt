@@ -1,1 +1,28 @@
-Mô tả đầy đủ: app làm gì, cho ai, tính năng chính.
+ROLL 36 là máy ảnh film analog với một quy tắc duy nhất: mỗi cuộn chỉ có 36 tấm, và bạn không được xem tấm nào cho đến khi cuộn phim được tráng xong.
+
+CHỤP MỘT CUỘN PHIM THẬT
+Nạp cuộn, chọn loại film rồi bấm máy. Bộ đếm chỉ giảm, về 0 là máy khóa. Ảnh được giấu kín trong lúc chụp nên mỗi lần bấm máy đều có trọng lượng. Không xem lại, không xóa, không chụp lại.
+
+TRÁNG PHIM VÀ CHỜ
+Chụp xong, đưa cuộn vào phòng tráng. Việc tráng mất đúng 60 phút theo thời gian thật và vẫn chạy khi bạn thoát app. Không có nút bỏ qua, cũng không có gì để mua cho nhanh hơn. Hết giờ, cả 36 tấm hiện ra cùng lúc trên một bảng contact sheet. Bạn có thể xem toàn màn hình, chia sẻ hoặc lưu vào Ảnh.
+
+ĐƯA ẢNH CÓ SẴN VÀO PHÒNG TRÁNG
+Đã có ảnh trong máy? Chọn ảnh từ thư viện, chọn loại film, xem trước màu rồi tráng. Ảnh nhập vào không tốn tấm nào trong cuộn của bạn.
+
+14 LOẠI FILM, 4 NHÓM
+Mỗi loại film có màu, độ tương phản, hạt và quầng sáng (halation) riêng.
+• Chân dung: Portra 400, Ektar 100, Pro 400H, Gold 200, UltraMax 400
+• Đen trắng: Tri-X 400, HP5 Plus, Acros 100
+• Chụp đêm: Cinestill 800T, Portra 800
+• Hết hạn và slide: Expired Gold, Expired Fuji, Velvia 50, Provia 100F
+
+GIÁ MINH BẠCH
+ROLL 36 tải miễn phí và có sẵn Portra 400 miễn phí. 13 loại film còn lại là giao dịch mua trong app, chỉ trả một lần, mua lẻ từng loại hoặc mua trọn bộ. Không đăng ký định kỳ, không tài khoản, không quảng cáo.
+Bản miễn phí gồm: Portra 400, 5 ảnh nhập từ thư viện, tráng một cuộn tại một thời điểm và dấu ROLL 36 nhỏ trên ảnh xuất ra. Chỉ cần mua bất kỳ gói nào là mất dấu và bỏ giới hạn nhập ảnh, tráng nhiều cuộn song song. Khôi phục giao dịch đã mua nằm trong Cài đặt.
+
+RIÊNG TƯ TỪ THIẾT KẾ
+Không tài khoản, không theo dõi, không phân tích hành vi. Ảnh nằm trên máy của bạn và không được tải lên đâu cả. Vì không có đám mây, xóa app là mất luôn ảnh trong app, nên hãy lưu những tấm bạn muốn giữ vào Ảnh trước.
+
+Có tiếng Việt và tiếng Anh.
+
+Tên các loại film chỉ dùng để mô tả phong cách màu mà mỗi loại lấy cảm hứng. ROLL 36 không liên kết với và không được bảo trợ bởi bất kỳ nhà sản xuất film nào.
