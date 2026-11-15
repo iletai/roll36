@@ -33,6 +33,9 @@ Packages/
 # Local secrets and machine-specific config
 .env
 .env.*
+# Non-secret app config is committed (secrets live only in the root .env)
+!.env.example
+!fastlane/.env.*
 *.local
 *.xcconfig.local
 
