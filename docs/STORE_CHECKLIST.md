@@ -113,3 +113,20 @@ Với Dev/Staging thay prefix bằng bundle id môi trường đó (Dev khớp `
 
 App ID và provisioning profile (match) của 3 môi trường đã sinh bằng `fastlane bootstrap` + `sync_signing`.
 GitHub `iletai/roll36` (private): default `develop`, protection trên `develop`/`main`, environments `dev`/`staging`/`production`, secrets đã đặt. `production` chưa có required reviewer vì repo private cần GitHub Pro.
+
+## Trạng thái cuối (2026-11-15)
+
+Đã xong (kiểm chứng bằng ASC API, `scripts/asc/verify_iaps.rb`):
+- Landing/privacy/support live: https://apps-site-six.vercel.app/apps/roll36
+- Record Prod: metadata vi/en, 5 screenshot 6.9" mỗi ngôn ngữ, Age Rating 4+, App Privacy "Data Not Collected" (đã Publish), giá Free, 175 nước, Content Rights, App Review contact, phát hành thủ công, build 1.0.0 (1) đã gắn.
+- 42 IAP (14 × 3 record): giá USD, 175 nước, vi + en-US, screenshot review.
+- TestFlight: nhóm Internal trên Dev (2 build) và Staging (1 build) với tester là chủ tài khoản, Test Information đã điền.
+- CI: push `develop` → TestFlight Dev; `workflow_dispatch` Staging/Prod đã chạy thành công.
+
+Việc còn lại (cần chủ app):
+1. **Gửi duyệt**: trang phiên bản 1.0.0 → "Add for Review". IAP đầu tiên phải gửi cùng phiên bản: chọn các IAP trong mục In-App Purchases của lần gửi. Chưa bấm.
+2. Price change: `full` đang $4.99; PLAN muốn $9.99 sau 14 ngày (lên lịch ở trang giá của IAP).
+3. Test trên iPhone thật theo PLAN §15.3; tinh chỉnh màu LUT/grain so với film thật.
+4. GitHub `production` environment: required reviewer cần GitHub Pro.
+5. Apple Silicon Mac availability đang để mặc định (bật); cân nhắc tắt vì app cần camera.
+6. Screenshot tái tạo: `scripts/screenshots/capture.sh` rồi `bundle exec fastlane screenshots capture:false upload:true --env prod`.
