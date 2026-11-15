@@ -40,3 +40,18 @@ Packages/
 fastlane/report.xml
 fastlane/screenshots/**/*.png
 fastlane/test_output/
+
+# House scaffold
+## Xcode / XcodeGen
+## Swift Package Manager
+Packages/*/.build/
+Packages/*/.swiftpm/
+## macOS
+## Secrets / local config
+## fastlane
+fastlane/README.md
+## Local xcconfig secrets
+Config/Secrets.xcconfig
+
+# Claude Code agent worktrees
+.claude/

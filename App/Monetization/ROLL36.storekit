@@ -1,0 +1,297 @@
+{
+  "identifier": "R36A0001",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "6500000001",
+      "localizations": [
+        {
+          "description": "All 14 film stocks, unlimited imports, parallel developing, no watermark.",
+          "displayName": "Full Unlock",
+          "locale": "en_US"
+        },
+        {
+          "description": "Toàn bộ 14 loại phim, nhập ảnh không giới hạn, tráng song song, không watermark.",
+          "displayName": "Mở khóa toàn bộ",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.full",
+      "referenceName": "Full unlock",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000002",
+      "localizations": [
+        {
+          "description": "Unlock the Ektar 100 film stock.",
+          "displayName": "Ektar 100",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Ektar 100.",
+          "displayName": "Ektar 100",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.ektar100",
+      "referenceName": "Ektar 100",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000003",
+      "localizations": [
+        {
+          "description": "Unlock the Fuji Pro 400H film stock.",
+          "displayName": "Fuji Pro 400H",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Fuji Pro 400H.",
+          "displayName": "Fuji Pro 400H",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.fuji400h",
+      "referenceName": "Fuji Pro 400H",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6500000004",
+      "localizations": [
+        {
+          "description": "Unlock the Gold 200 film stock.",
+          "displayName": "Gold 200",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Gold 200.",
+          "displayName": "Gold 200",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.gold200",
+      "referenceName": "Gold 200",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6500000005",
+      "localizations": [
+        {
+          "description": "Unlock the UltraMax 400 film stock.",
+          "displayName": "UltraMax 400",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim UltraMax 400.",
+          "displayName": "UltraMax 400",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.ultramax400",
+      "referenceName": "UltraMax 400",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000006",
+      "localizations": [
+        {
+          "description": "Unlock the Tri-X 400 film stock.",
+          "displayName": "Tri-X 400",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Tri-X 400.",
+          "displayName": "Tri-X 400",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.trix400",
+      "referenceName": "Tri-X 400",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000007",
+      "localizations": [
+        {
+          "description": "Unlock the HP5 Plus film stock.",
+          "displayName": "HP5 Plus",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim HP5 Plus.",
+          "displayName": "HP5 Plus",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.hp5",
+      "referenceName": "HP5 Plus",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6500000008",
+      "localizations": [
+        {
+          "description": "Unlock the Acros 100 film stock.",
+          "displayName": "Acros 100",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Acros 100.",
+          "displayName": "Acros 100",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.acros100",
+      "referenceName": "Acros 100",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000009",
+      "localizations": [
+        {
+          "description": "Unlock the Cinestill 800T film stock.",
+          "displayName": "Cinestill 800T",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Cinestill 800T.",
+          "displayName": "Cinestill 800T",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.cinestill800t",
+      "referenceName": "Cinestill 800T",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000010",
+      "localizations": [
+        {
+          "description": "Unlock the Portra 800 film stock.",
+          "displayName": "Portra 800",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Portra 800.",
+          "displayName": "Portra 800",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.portra800",
+      "referenceName": "Portra 800",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6500000011",
+      "localizations": [
+        {
+          "description": "Unlock the Expired Gold film stock.",
+          "displayName": "Expired Gold",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Expired Gold.",
+          "displayName": "Expired Gold",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.expiredGold",
+      "referenceName": "Expired Gold",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6500000012",
+      "localizations": [
+        {
+          "description": "Unlock the Expired Fuji film stock.",
+          "displayName": "Expired Fuji",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Expired Fuji.",
+          "displayName": "Expired Fuji",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.expiredFuji",
+      "referenceName": "Expired Fuji",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000013",
+      "localizations": [
+        {
+          "description": "Unlock the Velvia 50 film stock.",
+          "displayName": "Velvia 50",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Velvia 50.",
+          "displayName": "Velvia 50",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.velvia50",
+      "referenceName": "Velvia 50",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "1.49",
+      "familyShareable": false,
+      "internalID": "6500000014",
+      "localizations": [
+        {
+          "description": "Unlock the Provia 100F film stock.",
+          "displayName": "Provia 100F",
+          "locale": "en_US"
+        },
+        {
+          "description": "Mở khóa loại phim Provia 100F.",
+          "displayName": "Provia 100F",
+          "locale": "vi"
+        }
+      ],
+      "productID": "com.lequangtrongtai.roll36.dev.film.provia100",
+      "referenceName": "Provia 100F",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storefrontID": "143441"
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

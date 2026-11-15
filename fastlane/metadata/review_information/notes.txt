@@ -1,0 +1,24 @@
+No login, account or demo credentials are required. The app works fully offline and has no backend.
+
+WHAT THE APP DOES
+ROLL 36 is an analog film camera. The user loads a roll of 36 frames and shoots. Frames are intentionally hidden until the roll is developed, as on real film. After shooting, the user starts developing and waits; when the wait ends, all frames appear on a contact sheet. A darkroom tab also applies film looks to photos the user imports from the library.
+
+PERMISSIONS
+- Camera: used only to take photos inside the app (the viewfinder). If denied, the app shows a screen explaining how to enable it in Settings.
+- Photos: photos are imported with the system PhotosPicker (no full-library access) and saved to the library only when the user taps Save.
+No data is collected, no tracking, no third-party SDKs.
+
+DESIGN FEATURES THAT MAY LOOK LIKE BUGS
+1. Captured frames cannot be viewed before developing. This is the core mechanic of the app, not a missing feature. The viewfinder only shows the frame number, not the photo.
+2. Developing takes 60 minutes of real time, by design. It continues if the app is closed. There is deliberately no skip or "speed up" option.
+   To review a developed roll quickly: on the real device the full flow needs the 60-minute wait. Imported photos in the Darkroom tab are developed immediately (no wait), so all film looks and purchases can be reviewed without waiting.
+
+HOW TO TEST THE IN-APP PURCHASES (sandbox)
+Free: Portra 400, 5 imported photos, one roll developing at a time, small "ROLL 36" mark on exported photos.
+1. Open the Library tab. Tap any locked film stock, or "Unlock all 14 stocks", to open the purchase sheet.
+2. Buy either the full set (non-consumable, product id <bundle id>.full) or a single stock (non-consumable, <bundle id>.film.<stockID>, for example .film.trix400).
+3. After a purchase the stock shows "Owned" and the mark is removed from exported photos.
+4. Restore Purchases is available on the Library screen and in Settings.
+All products are non-consumable, one-time purchases. There are no subscriptions and no consumables.
+
+Contact for questions: see the support URL in the app listing.
