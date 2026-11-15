@@ -7,9 +7,17 @@ struct ROLL36App: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            root
                 .environment(environment)
                 .modelContainer(environment.modelContainer)
         }
+    }
+
+    @ViewBuilder private var root: some View {
+        #if DEBUG
+            DemoSeedGate(env: environment) { RootView() }
+        #else
+            RootView()
+        #endif
     }
 }

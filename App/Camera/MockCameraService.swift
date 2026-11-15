@@ -23,6 +23,10 @@ actor MockCameraService: CameraService {
 
     func capture() async throws -> Data {
         guard isRunning else { throw CameraError.unavailable }
+        #if DEBUG
+            // Screenshot mode: a real-looking photo instead of the synthetic scene (e.g. for `-seedImport`).
+            if DemoSeed.isEnabled, let data = DemoSeed.photoData(6) { return data }
+        #endif
         frame += 1
         guard let data = Self.render(frame: frame) else { throw CameraError.captureFailed }
         return data
