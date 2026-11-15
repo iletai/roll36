@@ -82,9 +82,13 @@ final class RollRepository {
         try fetchRolls().count { if case .developing = $0.state(now: now) { true } else { false } }
     }
 
+    /// Read-only: nil until the first import, so views can poll it without writing.
+    func existingImportRoll() throws -> Roll? {
+        try context.fetch(FetchDescriptor<Roll>(predicate: #Predicate { $0.isImportRoll })).first
+    }
+
     func importRoll() throws -> Roll {
-        let descriptor = FetchDescriptor<Roll>(predicate: #Predicate { $0.isImportRoll })
-        if let existing = try context.fetch(descriptor).first { return existing }
+        if let existing = try existingImportRoll() { return existing }
         let roll = Roll(stockID: Self.importStockID, capacity: 0, isImportRoll: true)
         context.insert(roll)
         try context.save()

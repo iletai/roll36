@@ -124,7 +124,7 @@ struct DarkroomView: View {
 
     /// The import pseudo-roll only counts once it holds frames (it is created on first access).
     private func importRollWithFrames() -> Roll? {
-        guard let roll = try? env.repository.importRoll(), !roll.shots.isEmpty else { return nil }
+        guard let roll = try? env.repository.existingImportRoll(), !roll.shots.isEmpty else { return nil }
         return roll
     }
 
