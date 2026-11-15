@@ -1,23 +1,6 @@
 {
   "sourceLanguage" : "vi",
   "strings" : {
-    "CFBundleDisplayName" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ROLL 36"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ROLL 36"
-          }
-        }
-      }
-    },
     "NSCameraUsageDescription" : {
       "extractionState" : "manual",
       "localizations" : {
