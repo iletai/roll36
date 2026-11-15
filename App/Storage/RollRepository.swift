@@ -3,7 +3,11 @@ import SwiftData
 
 enum AppSchema {
     static func container(inMemory: Bool = false) throws -> ModelContainer {
-        try ModelContainer(
+        // A fresh install has no Application Support yet; SwiftData would log CoreData errors before creating it.
+        if !inMemory {
+            try FileManager.default.createDirectory(at: .applicationSupportDirectory, withIntermediateDirectories: true)
+        }
+        return try ModelContainer(
             for: Roll.self, Shot.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: inMemory)
         )
