@@ -19,3 +19,14 @@ The Stitch screens show two different bars (Roll/Framing/Trigger/Settings on vie
 
 ## D5. Copy in the Stitch screens that contradicts PLAN
 "DEVELOP FRAME — 1 CREDIT" (import) and "$0.99 / $1.49" per stock are Stitch placeholders. PLAN §11.2 (5 free imports, no credits) and §7.4 (prices per stock) win. Prices shown in the UI come from StoreKit `Product.displayPrice`, with the catalog price only as a fallback label.
+
+## D6. Locked stocks: preview allowed, developing/export gated
+PLAN §12.3 says locked stocks can be previewed and exports are watermarked. Implemented as: any stock can be previewed (Import preview, Library detail); developing an import with a locked stock opens the paywall; a roll is loaded only with an unlocked stock; `EntitlementStore.removesWatermark` (any purchase) decides whether `FilmEngine.watermarked` is applied on share/save.
+
+## D7. Where the Stitch screens break the core mechanic
+- The viewfinder shows a thumbnail of the last frame bottom-left; PLAN §9.4 forbids showing shots before developing, so only the frame number (`#11`) is shown.
+- "Batch import roll" (import screen) is not in PLAN v1 and is skipped.
+- Darkroom chemistry labels (tank, bath, temperature, stage) are decorative and derived from the roll/stock, not real data.
+
+## D8. Navigation entry points
+Camera tab: top-right sliders button opens `SettingsView` (sheet). Darkroom header flask button opens `ImportView` (full screen cover). Locked stock or limit reached opens `PaywallView(highlightStockID:)` (sheet). Developed roll pushes `ContactSheetView(roll:)` inside the Darkroom `NavigationStack`. The service container is `AppEnvironment` (`@Environment(AppEnvironment.self)`).
