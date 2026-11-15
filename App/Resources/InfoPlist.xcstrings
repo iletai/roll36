@@ -1,7 +1,74 @@
 {
   "sourceLanguage" : "vi",
   "strings" : {
-
+    "CFBundleDisplayName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 needs the camera to expose frames onto your film roll."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 cần dùng máy ảnh để phơi sáng từng tấm lên cuộn phim của bạn."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 saves developed frames to your photo library."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 lưu các tấm đã tráng vào thư viện ảnh của bạn."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 saves developed frames to your photo library and applies film stocks to photos you pick."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ROLL 36 lưu các tấm đã tráng vào thư viện ảnh và áp loại phim lên những ảnh bạn chọn."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }
