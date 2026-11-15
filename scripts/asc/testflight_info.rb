@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Fill TestFlight "Test Information" (en-US + vi descriptions, feedback email, URLs) and the beta review contact.
 # Usage: bundle exec ruby scripts/asc/testflight_info.rb <asc_app_id>
+# Texts and URLs come from fastlane/metadata/<locale>/{promotional_text,marketing_url,privacy_url}.txt.
 # Credentials and contact details come from ./.env (ASC_*, APP_REVIEW_*); nothing secret is printed.
 require "base64"
 require "faraday"
@@ -22,17 +23,17 @@ def call(conn, token, verb, path, body = nil)
   [res.status, res.body.to_s.empty? ? {} : JSON.parse(res.body)]
 end
 
-site = "https://apps-site-six.vercel.app/apps/roll36"
-texts = {
-  "en-US" => "ROLL 36 is an analog film camera: you shoot a finite roll of 36 frames, frames stay hidden until you develop the roll and wait. Test the viewfinder, the Darkroom (developing takes about an hour), the film Library and importing a photo.",
-  "vi" => "ROLL 36 là máy ảnh film analog: mỗi cuộn chỉ có 36 tấm, ảnh bị giấu cho đến khi bạn tráng cuộn và chờ. Hãy thử viewfinder, Darkroom (tráng mất khoảng một giờ), thư viện film và nhập ảnh."
-}
+# Per locale, read the beta description and URLs from the same fastlane metadata the store listing uses.
+meta = File.join(root, "fastlane/metadata")
+read = ->(locale, name) { f = File.join(meta, locale, name); File.file?(f) ? File.read(f).strip : nil }
+locales = Dir.children(meta).select { |d| File.file?(File.join(meta, d, "promotional_text.txt")) }
+abort "no fastlane/metadata/<locale>/promotional_text.txt found" if locales.empty?
 
 _, existing = call(conn, token, :get, "/v1/apps/#{app_id}/betaAppLocalizations?limit=50")
 by_locale = (existing["data"] || []).to_h { |l| [l.dig("attributes", "locale"), l["id"]] }
-texts.each do |locale, description|
-  attrs = { locale: locale, description: description, feedbackEmail: env.fetch("APP_REVIEW_EMAIL"),
-            marketingUrl: site, privacyPolicyUrl: "#{site}/privacy" }
+locales.each do |locale|
+  attrs = { locale: locale, description: read.call(locale, "promotional_text.txt"), feedbackEmail: env.fetch("APP_REVIEW_EMAIL"),
+            marketingUrl: read.call(locale, "marketing_url.txt"), privacyPolicyUrl: read.call(locale, "privacy_url.txt") }.compact
   if by_locale[locale]
     status, = call(conn, token, :patch, "/v1/betaAppLocalizations/#{by_locale[locale]}",
                    { data: { type: "betaAppLocalizations", id: by_locale[locale], attributes: attrs.reject { |k, _| k == :locale } } })
@@ -50,7 +51,7 @@ status, = call(conn, token, :patch, "/v1/betaAppReviewDetails/#{detail_id}", {
   data: { type: "betaAppReviewDetails", id: detail_id, attributes: {
     contactFirstName: env.fetch("APP_REVIEW_FIRST_NAME"), contactLastName: env.fetch("APP_REVIEW_LAST_NAME"),
     contactPhone: env.fetch("APP_REVIEW_PHONE"), contactEmail: env.fetch("APP_REVIEW_EMAIL"),
-    demoAccountRequired: false, notes: "No login required. Developing a roll takes about 60 minutes by design."
+    demoAccountRequired: false, notes: "No login or demo account required."
   } }
 })
 puts "review detail: #{status}"

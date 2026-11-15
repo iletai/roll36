@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
-# Read-only audit of every in-app purchase of an ASC app against App/Monetization/ROLL36.storekit.
-# Usage: bundle exec ruby scripts/asc/verify_iaps.rb <asc_app_id> <bundle_id>
+# Read-only audit of every in-app purchase of an ASC app against the project .storekit file.
+# Usage: bundle exec ruby scripts/asc/verify_iaps.rb <asc_app_id> <env_bundle_id> <path/to/App.storekit>
+# The .storekit file uses the Dev bundle id as prefix; it is derived from <env_bundle_id>.
 # Checks per product: exists, USD base price, availability territory count, vi + en localizations, review screenshot.
 require "base64"
 require "faraday"
 require "json"
 require "spaceship"
 
-app_id, bundle_id = ARGV
-abort "usage: #{$PROGRAM_NAME} <asc_app_id> <bundle_id>" unless app_id && bundle_id
+app_id, bundle_id, storekit_path = ARGV
+abort "usage: #{$PROGRAM_NAME} <asc_app_id> <env_bundle_id> <path/to/App.storekit>" unless app_id && bundle_id && storekit_path
 
 root = File.expand_path("../..", __dir__)
 env = File.read(File.join(root, ".env")).scan(/^(ASC_[A-Z0-9_]+)=(.*)$/).to_h.transform_values { |v| v.delete('"') }
@@ -19,8 +20,9 @@ token = Spaceship::ConnectAPI::Token.create(
 )
 
 # Expected prices keyed by the product id suffix (storekit file uses the Dev prefix).
-storekit = JSON.parse(File.read(File.join(root, "App/Monetization/ROLL36.storekit")))
-expected = storekit["products"].to_h { |p| [p["productID"].sub("com.lequangtrongtai.roll36.dev.", ""), p["displayPrice"]] }
+dev_prefix = "#{bundle_id.sub(/\.(dev|staging)\z/, '')}.dev."
+storekit = JSON.parse(File.read(storekit_path))
+expected = storekit["products"].to_h { |p| [p["productID"].sub(dev_prefix, ""), p["displayPrice"]] }
 
 API = "https://api.appstoreconnect.apple.com"
 conn = Faraday.new(API)
