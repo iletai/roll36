@@ -2,13 +2,13 @@
 
 ## What this app is
 
-<!-- One paragraph: what ROLL36 does and for whom. -->
+ROLL 36 is an analog film camera for iOS: you shoot a finite roll of 36 frames, frames stay hidden until the roll is developed (real-time wait, 60 min, no skip), and a darkroom applies film stocks to imported photos. One-time purchases only (1 free stock + 13 paid, or full unlock); no subscription, account, ads or analytics. `PLAN.md` is the source of truth, `DECISIONS.md` records every deviation from it. Moat = scarcity and waiting: never add anything that shows frames early or speeds up developing.
 
 ## Architecture
 
-- `App/` — SwiftUI app target. `Features/<Name>/` per screen.
+- `App/` — SwiftUI app target: `App/` (AppEnvironment DI container), `DesignSystem/`, `Models/`, `FilmEngine/` (LUT generated in code, no .cube), `Camera/` (protocol + Live + Mock for the simulator), `Storage/`, `Monetization/` (StoreKit 2 non-consumables; product ids = bundle id + `.full` / `.film.<stockID>`), `Features/<Name>/` per screen.
 - `Packages/` — local Swift packages (add to `project.yml` `packages:` + target `dependencies:`).
-- Own libraries (navigation, update prompt, StoreKit): see skill `iletai-libs`.
+- No third-party dependencies (PLAN §4.1): no SPM packages, so do not use `new_app.sh --with nav|update|ads`.
 
 ## Conventions
 
