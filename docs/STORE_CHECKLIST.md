@@ -102,3 +102,14 @@ Với Dev/Staging thay prefix bằng bundle id môi trường đó (Dev khớp `
 ## 3. Upload metadata (khi sẵn sàng, làm tay hoặc theo lệnh riêng)
 
 `fastlane deliver` chỉ metadata, `--skip_binary_upload true`, rồi attach build và Submit for Review trong ASC. Không push và không submit khi chưa có lệnh rõ ràng.
+
+## App Store Connect records (tạo 2026-11-15, ngôn ngữ chính: Vietnamese)
+
+| Record | Bundle ID | SKU | Apple ID |
+|---|---|---|---|
+| ROLL 36 | `com.lequangtrongtai.roll36` | roll36 | 6835088381 |
+| ROLL 36 Staging | `com.lequangtrongtai.roll36.staging` | roll36-staging | 6835088307 |
+| ROLL 36 Dev | `com.lequangtrongtai.roll36.dev` | roll36-dev | 6835088626 |
+
+App ID và provisioning profile (match) của 3 môi trường đã sinh bằng `fastlane bootstrap` + `sync_signing`.
+GitHub `iletai/roll36` (private): default `develop`, protection trên `develop`/`main`, environments `dev`/`staging`/`production`, secrets đã đặt. `production` chưa có required reviewer vì repo private cần GitHub Pro.
