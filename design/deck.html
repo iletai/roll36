@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROLL 36 — Design &amp; Business Case</title>
+<style>
+  :root{
+    --bg:#0F0D0A; --surface:#17140F; --card:#221F1A; --line:#332E25;
+    --text:#F4F1EA; --muted:#9C948A; --amber:#EF9F27; --green:#7FB07A; --red:#E0765F;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1140px;margin:0 auto;padding:56px 32px 80px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:54px;line-height:1.03;margin:14px 0 12px;font-weight:500;letter-spacing:-.02em}
+  h2{font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--amber);margin:60px 0 18px;font-family:ui-monospace,Menlo,monospace}
+  h3{font-size:15px;font-weight:500;margin:0 0 4px}
+  p{margin:0 0 14px;color:#D8D2C7;font-size:15px}
+  .lede{font-size:19px;color:var(--text);max-width:660px}
+  b{font-weight:500;color:var(--text)}
+  .screens{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+  .screen{width:238px}
+  .screen img{width:100%;display:block;border-radius:14px;border:1px solid var(--line)}
+  .screen .cap{margin-top:10px;font-size:11px;color:var(--muted);
+    font-family:ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .stat{background:var(--card);border-radius:10px;padding:16px 18px}
+  .stat .n{font-size:26px;font-weight:500;line-height:1.1;margin-bottom:4px}
+  .stat .l{font-size:12px;color:var(--muted)}
+  .stat.hi .n{color:var(--amber)}
+  .stat.bad .n{color:var(--red)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:400;padding:10px 10px;border-bottom:1px solid var(--line);
+    font-family:ui-monospace,Menlo,monospace}
+  td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:#D8D2C7}
+  td:first-child{color:var(--text);font-weight:500}
+  .price{font-family:ui-monospace,Menlo,monospace;white-space:nowrap;color:var(--text)}
+  .price.amber{color:var(--amber)}
+  .price.bad{color:var(--red)}
+  .gap{background:var(--surface);border-left:2px solid var(--amber);
+    border-radius:0 10px 10px 0;padding:16px 20px;margin-bottom:12px}
+  .gap .t{font-size:14px;font-weight:500;margin-bottom:4px}
+  .gap .d{font-size:13.5px;color:var(--muted);margin:0}
+  ol.plan{margin:0;padding-left:20px;color:#D8D2C7;font-size:14.5px}
+  ol.plan li{margin-bottom:12px}
+  .risk{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .risk div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .risk .t{font-size:13px;font-weight:500;margin-bottom:4px}
+  .risk .d{font-size:13px;color:var(--muted);margin:0}
+  .verdict{background:var(--card);border-radius:12px;padding:22px 24px;margin-top:18px}
+  .verdict p{margin:0;font-size:15.5px;color:var(--text)}
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.8}
+  @media(max-width:680px){h1{font-size:34px}.wrap{padding:32px 18px}.risk{grid-template-columns:1fr}
+    .screen{width:100%;max-width:280px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mono">iOS · Analog camera · Design &amp; business case</div>
+  <h1>ROLL 36</h1>
+  <p class="lede">Máy ảnh film analog cho iOS. Cuộn 36 tấm hữu hạn, tráng theo thời gian thực, và phòng rửa cho phép tráng cả ảnh cũ trong thư viện. Bán một lần, không subscription.</p>
+
+  <h2>Đối thủ thật và giá thật</h2>
+  <p>Sáu app cùng nhóm, số liệu lấy từ App Store và báo chí chuyên ngành qua nghiên cứu NotebookLM. Cột cuối là điều quyết định vị thế của bạn.</p>
+  <table>
+    <tr><th>App</th><th>Mô hình giá</th><th>Điểm yếu người dùng phàn nàn</th></tr>
+    <tr><td>mood.camera</td><td class="price">$14.99 trọn đời · $1.99/tháng</td><td>Không live preview, <b>không import ảnh</b>, không quay video</td></tr>
+    <tr><td>Dazz Cam</td><td class="price">$14.99 trọn đời · $5.49/năm</td><td>Camera đẹp nhất nằm sau paywall, giao diện rối</td></tr>
+    <tr><td>ism</td><td class="price bad">$7.99 / tuần (~$32/tháng)</td><td>Giá bị phản đối dữ dội, free chỉ 3 ảnh/ngày</td></tr>
+    <tr><td>Flipcorder</td><td class="price">$4.99 một lần, không IAP</td><td>Chỉ quay video, mỗi clip 20 giây, không có ảnh tĩnh</td></tr>
+    <tr><td>Tape2</td><td class="price">Free + $0.49/băng · $4.99 tất cả</td><td>Phụ thuộc Apple Music, không phải app chụp ảnh</td></tr>
+    <tr><td>Analog Cam</td><td class="price">Free + IAP</td><td>Mờ nhạt, filter đẹp đều phải trả tiền</td></tr>
+  </table>
+
+  <h2>Ba khoảng trống đang mở</h2>
+  <div class="gap">
+    <div class="t">1. Giá công bằng là vũ khí</div>
+    <p class="d">ism bán $7.99 mỗi <em>tuần</em> và bị người dùng phản ứng công khai. Một mức $4.99–$9.99 mua một lần là lợi thế cạnh tranh trực tiếp, không phải chiêu giảm giá.</p>
+  </div>
+  <div class="gap">
+    <div class="t">2. Không ai cho tráng ảnh cũ</div>
+    <p class="d">mood.camera không import được ảnh từ thư viện — người dùng muốn áp film lên ảnh đã chụp thì bị chặn. Đây là tính năng rẻ để làm và mở rộng tệp người dùng gấp đôi.</p>
+  </div>
+  <div class="gap">
+    <div class="t">3. Ảnh và video bị tách rời</div>
+    <p class="d">mood.camera không có video; Flipcorder chỉ có video và giới hạn 20 giây. Chưa app nào làm tốt cả hai. Để dành cho v1.1, đừng đưa vào bản đầu.</p>
+  </div>
+
+  <h2>Bốn màn hình</h2>
+  <div class="screens">
+    <div class="screen"><img src="01-viewfinder.png" alt="Viewfinder"><div class="cap">01 — Viewfinder</div></div>
+    <div class="screen"><img src="02-darkroom.png" alt="Darkroom"><div class="cap">02 — Darkroom</div></div>
+    <div class="screen"><img src="03-library.png" alt="Film library"><div class="cap">03 — Film library</div></div>
+    <div class="screen"><img src="04-import.png" alt="Import to darkroom"><div class="cap">04 — Import to darkroom</div></div>
+  </div>
+
+  <h2>Vì sao cơ chế cuộn phim quan trọng</h2>
+  <p>Filter thì app nào cũng có — đó không phải hào. Hào là <b>sự khan hiếm và chờ đợi</b>: cuộn 36 tấm là hữu hạn, ảnh chỉ hiện ra sau khi tráng xong. Người dùng không xem lại được ngay, nên mỗi lần bấm máy có trọng lượng. Đây là thứ đối thủ không sao chép bằng cách thêm filter, và là lý do người ta kể về app với bạn bè.</p>
+
+  <h2>Mô hình doanh thu</h2>
+  <table>
+    <tr><th>Bậc</th><th>Nội dung</th><th>Giá</th><th>Vai trò</th></tr>
+    <tr><td>Free</td><td>1 film stock, chụp không giới hạn, có watermark nhỏ</td><td class="price">$0</td><td>Đủ tốt để dùng thật</td></tr>
+    <tr><td>Film pack</td><td>Portra, Fuji, Tri-X, Cinestill, Ektar…</td><td class="price amber">$0.99 – $1.49</td><td>Quyết định trong 5 giây</td></tr>
+    <tr><td>Trọn bộ</td><td>14 stock + import không giới hạn</td><td class="price amber">$4.99 ra mắt → $9.99</td><td>Đòn bẩy chính, neo giá pack lẻ</td></tr>
+    <tr><td>Subscription</td><td colspan="2" style="color:var(--muted)">Cố tình không làm</td><td>Đây chính là điểm tấn công ism</td></tr>
+  </table>
+  <div class="verdict">
+    <p><b>Nguyên tắc:</b> $4.99 trong 2 tuần đầu để lấy review và xếp hạng, sau đó nâng $9.99 vĩnh viễn. Người mua sớm thành người ủng hộ — và giá ra mắt là lý do để họ chia sẻ ngay.</p>
+  </div>
+
+  <h2>Kế hoạch 30 ngày</h2>
+  <ol class="plan">
+    <li><b>Tuần 1 — Lõi kỹ thuật.</b> AVCapture + Core Image LUT cho 3 stock đầu. Đo FPS trên máy thật, không tin simulator.</li>
+    <li><b>Tuần 2 — Cơ chế cuộn.</b> Đếm 36 tấm, hàng đợi tráng, màn Darkroom. Đây là phần tạo khác biệt, đừng cắt để tiết kiệm thời gian.</li>
+    <li><b>Tuần 3 — Thương mại + import.</b> StoreKit 2 cho pack lẻ và trọn bộ, màn Import, restore purchase. Test sandbox trước khi submit.</li>
+    <li><b>Tuần 4 — Phân phối.</b> TestFlight 20 người, sửa crash, submit. Chuẩn bị 15 ảnh mẫu cho trang App Store.</li>
+  </ol>
+
+  <h2>Rủi ro đã biết</h2>
+  <div class="risk">
+    <div><div class="t">Chất lượng LUT</div><p class="d">Rủi ro lớn nhất. Màu không thật thì không ai trả tiền. Phải so sánh trực tiếp với ảnh film thật.</p></div>
+    <div><div class="t">Cạnh tranh dày</div><p class="d">Sáu đối thủ đã có mặt. Chống bằng cơ chế cuộn, không bằng thêm filter.</p></div>
+    <div><div class="t">Không có ngân sách ads</div><p class="d">Vòng lặp tăng trưởng phải là ảnh xuất ra được chia sẻ. Nếu ảnh không đủ đẹp để đăng, app chết.</p></div>
+    <div><div class="t">Review của Apple</div><p class="d">Mô tả rõ IAP là nội dung số. Không dùng từ "unlock" mơ hồ trong metadata.</p></div>
+  </div>
+
+  <footer>
+    ROLL 36 · Thiết kế: Google Stitch (Gemini 3.8 Flash), project 208101431842791838<br>
+    Xếp hạng: Apple Marketing Tools RSS, App Store US, 15/11/2026<br>
+    Đối thủ &amp; giá: NotebookLM deep research, notebook ec867fb0
+  </footer>
+</div>
+</body>
+</html>
