@@ -2,7 +2,8 @@ import CoreImage
 import CoreImage.CIFilterBuiltins
 
 /// Film grain (PLAN §8.2 step 4, §8.4).
-/// shortcut: CIRandomGenerator is not seeded, so re-developing a shot gives different grain; v1 never re-develops (PLAN §8.4). Seed from shot.id if that changes.
+/// shortcut: CIRandomGenerator is not seeded, so re-developing a shot gives different grain; v1 never re-develops (PLAN §8.4). Seed from
+/// shot.id if that changes.
 nonisolated enum GrainRenderer {
     /// `scale` = image width / 1000, so grain looks the same at every resolution.
     static func apply(to image: CIImage, profile: FilmProfile, scale: Double) -> CIImage {

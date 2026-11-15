@@ -37,7 +37,12 @@ actor FilmEngine {
         case .final:
             try await develop(jpeg, profile: profile, cubeDimension: ColorCubeBuilder.dimension, maxDimension: nil)
         case .preview:
-            try await develop(jpeg, profile: profile, cubeDimension: ColorCubeBuilder.previewDimension, maxDimension: Self.previewMaxDimension)
+            try await develop(
+                jpeg,
+                profile: profile,
+                cubeDimension: ColorCubeBuilder.previewDimension,
+                maxDimension: Self.previewMaxDimension
+            )
         }
     }
 
