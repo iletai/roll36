@@ -12,6 +12,9 @@ actor MockCameraService: CameraService {
     nonisolated let isAvailable = false
     private var isRunning = false
     private var frame = 0
+    /// Recorded for tests.
+    private(set) var focusPoints: [CGPoint?] = []
+    private(set) var exposureBiases: [Double] = []
 
     func start() async throws {
         isRunning = true
@@ -35,6 +38,14 @@ actor MockCameraService: CameraService {
     func setFlashMode(_: FlashMode) async {}
 
     func setZoom(_: Double) async {}
+
+    func focus(atNormalizedPoint point: CGPoint?) async {
+        focusPoints.append(point)
+    }
+
+    func setExposureBias(_ ev: Double) async {
+        exposureBiases.append(min(max(ev, ExposureBias.range.lowerBound), ExposureBias.range.upperBound))
+    }
 
     func exposureReadout() async -> ExposureReadout? {
         ExposureReadout(shutterSeconds: 1.0 / 500, aperture: 2.8, iso: 400)

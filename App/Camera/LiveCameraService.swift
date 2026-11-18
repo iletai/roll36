@@ -86,6 +86,39 @@ actor LiveCameraService: CameraService {
         }
     }
 
+    func focus(atNormalizedPoint point: CGPoint?) async {
+        guard let device else { return }
+        let target = point.map(ExposureBias.devicePoint(fromPreview:)) ?? CGPoint(x: 0.5, y: 0.5)
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            // The point of interest only applies once the mode is (re)set.
+            if device.isFocusPointOfInterestSupported, device.isFocusModeSupported(.continuousAutoFocus) {
+                device.focusPointOfInterest = target
+                device.focusMode = .continuousAutoFocus
+            }
+            if device.isExposurePointOfInterestSupported, device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposurePointOfInterest = target
+                device.exposureMode = .continuousAutoExposure
+            }
+        } catch {
+            Log.camera.error("focus lock failed: \(error.localizedDescription)")
+        }
+    }
+
+    func setExposureBias(_ ev: Double) async {
+        guard let device else { return }
+        let low = max(device.minExposureTargetBias, Float(ExposureBias.range.lowerBound))
+        let high = min(device.maxExposureTargetBias, Float(ExposureBias.range.upperBound))
+        do {
+            try device.lockForConfiguration()
+            await device.setExposureTargetBias(min(max(Float(ev), low), high))
+            device.unlockForConfiguration()
+        } catch {
+            Log.camera.error("exposure bias lock failed: \(error.localizedDescription)")
+        }
+    }
+
     func exposureReadout() async -> ExposureReadout? {
         guard let device, device.exposureDuration.isNumeric else { return nil }
         return ExposureReadout(

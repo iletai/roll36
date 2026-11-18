@@ -37,12 +37,24 @@
             let now = Date.now
             do {
                 // Order in the Darkroom list is createdAt descending.
-                let developing = try await shoot(env, variants, RollSpec(stockID: "expiredGold", capacity: 24, frames: 24, created: now - 3 * hour))
+                let developing = try await shoot(
+                    env,
+                    variants,
+                    RollSpec(stockID: "expiredGold", capacity: 24, frames: 24, created: now - 3 * hour)
+                )
                 developing.developStartedAt = now - 0.4 * RollRepository.developDuration
                 _ = try await shoot(env, variants, RollSpec(stockID: "cinestill800t", frames: 22, created: now - 4 * hour))
-                let portra = try await shoot(env, variants, RollSpec(stockID: "portra400", frames: 15, processed: true, created: now - 26 * hour))
+                let portra = try await shoot(
+                    env,
+                    variants,
+                    RollSpec(stockID: "portra400", frames: 15, processed: true, created: now - 26 * hour)
+                )
                 portra.developStartedAt = now - 2 * hour
-                let trix = try await shoot(env, variants, RollSpec(stockID: "trix400", frames: 12, processed: true, created: now - 50 * hour, offset: 7))
+                let trix = try await shoot(
+                    env,
+                    variants,
+                    RollSpec(stockID: "trix400", frames: 12, processed: true, created: now - 50 * hour, offset: 7)
+                )
                 trix.developStartedAt = now - 2 * hour
                 _ = try await shoot(env, variants, RollSpec(stockID: "portra400", frames: 12, isInCamera: true, created: now - 70 * hour))
                 try env.modelContainer.mainContext.save()

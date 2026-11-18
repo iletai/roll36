@@ -18,6 +18,9 @@ final class AppEnvironment {
     let liveLUTPreview = false
 
     /// Stock loaded into the next roll; changing it never touches a roll that is already shooting.
+    /// Lets deep flows (e.g. loading a new roll from a contact sheet) jump to the camera.
+    var selectedTab = AppTab.camera
+
     var selectedStockID: String {
         didSet { defaults.set(selectedStockID, forKey: Self.selectedStockKey) }
     }

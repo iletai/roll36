@@ -50,8 +50,8 @@ struct RollRepositoryTests {
         let roll = try repo.startRoll(stockID: "portra400")
         let shot = try await repo.appendShot(jpeg: jpeg, to: roll)
         #expect(!shot.imageFilename.contains("/"))
-        #expect(try await store.data(shot.imageFilename) == jpeg)
-        let thumbData = try await store.data(shot.thumbnailFilename)
+        #expect(await store.data(shot.imageFilename) == jpeg)
+        let thumbData = try #require(await store.data(shot.thumbnailFilename))
         let thumb = try #require(UIImage(data: thumbData))
         #expect(max(thumb.size.width, thumb.size.height) * thumb.scale <= 600)
     }
@@ -129,5 +129,11 @@ struct RollRepositoryTests {
         #expect(roll.state() == .active(remaining: 35))
         #expect(try repo.rolls().count == 1)
         #expect(try repo.currentRoll() === roll)
+    }
+
+    @Test func startRollUsesTheStocksFrameCount() throws {
+        let stock = try #require(FilmCatalog.all.first { $0.frames == 24 })
+        #expect(try repo.startRoll(stockID: stock.id).capacity == 24)
+        #expect(try repo.startRoll(stockID: "unknown").capacity == 36)
     }
 }

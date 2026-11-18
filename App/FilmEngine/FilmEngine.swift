@@ -12,7 +12,7 @@ nonisolated enum FilmEngineError: Error {
 /// Develops a JPEG with a film stock (PLAN §8.2). Owns the only CIContext; it never leaves the actor.
 actor FilmEngine {
     nonisolated enum Quality: Sendable {
-        case final, preview // preview = 17³ cube + downscaled
+        case final, preview // preview = downscaled input, same 33³ cube as final
     }
 
     private static let previewMaxDimension: CGFloat = 1080
@@ -37,17 +37,21 @@ actor FilmEngine {
         case .final:
             try await develop(jpeg, profile: profile, cubeDimension: ColorCubeBuilder.dimension, maxDimension: nil)
         case .preview:
+            // Option A: same 33³ cube as final, only the input is downscaled.
+            // This keeps color identical between preview and final; only resolution differs.
+            // Profiling on a 12MP image at 1080px with a 33³ cube is well under 2s on iPhone 17 Pro.
             try await develop(
                 jpeg,
                 profile: profile,
-                cubeDimension: ColorCubeBuilder.previewDimension,
+                cubeDimension: ColorCubeBuilder.dimension,
                 maxDimension: Self.previewMaxDimension
             )
         }
     }
 
+    /// Preview uses the same 33³ cube as final so the developed image matches what the user saw.
     func preview(_ jpeg: Data, profile: FilmProfile, maxDimension: CGFloat = 1080) async throws -> Data {
-        try await develop(jpeg, profile: profile, cubeDimension: ColorCubeBuilder.previewDimension, maxDimension: maxDimension)
+        try await develop(jpeg, profile: profile, cubeDimension: ColorCubeBuilder.dimension, maxDimension: maxDimension)
     }
 
     /// PLAN §12.3: "ROLL 36" monospaced, bottom-right, opacity 0.35, height 2% of image width.

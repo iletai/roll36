@@ -7,6 +7,50 @@ enum LegalLinks {
     static let terms = URL(string: "https://apps-site-six.vercel.app/apps/roll36/terms")
 }
 
+/// Camera preference options persisted via `@AppStorage`.
+enum CameraDefaultZoom: String, CaseIterable, Identifiable {
+    case mm28 = "28mm"
+    case mm35 = "35mm"
+    case mm50 = "50mm"
+
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .mm28: "28mm (1.0x)"
+        case .mm35: "35mm (1.25x)"
+        case .mm50: "50mm (1.8x)"
+        }
+    }
+}
+
+enum CameraTargetFPS: Int, CaseIterable, Identifiable {
+    case fps30 = 30
+    case fps60 = 60
+
+    var id: Int { rawValue }
+    var title: String {
+        switch self {
+        case .fps30: "30 FPS (Tiết kiệm pin)"
+        case .fps60: "60 FPS (Mượt mà)"
+        }
+    }
+}
+
+enum CameraFrameAspect: String, CaseIterable, Identifiable {
+    case ratio4_3 = "4:3"
+    case ratio3_2 = "3:2"
+    case ratio1_1 = "1:1"
+
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .ratio4_3: "4:3 (Cảm biến chuẩn)"
+        case .ratio3_2: "3:2 (Film 35mm cổ điển)"
+        case .ratio1_1: "1:1 (Vuông)"
+        }
+    }
+}
+
 /// Testable logic behind `SettingsView`: display strings and the delete-all flow.
 @Observable
 final class SettingsModel {

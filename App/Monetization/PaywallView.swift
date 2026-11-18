@@ -80,7 +80,10 @@ struct PaywallView: View {
             }
             .accessibilityIdentifier("paywall.buy")
             if let highlighted {
-                PrimaryButton(title: "Buy \(highlighted.displayName) only — \(env.purchases.price(forStock: highlighted.id))", style: .secondary) {
+                PrimaryButton(
+                    title: "Buy \(highlighted.displayName) only — \(env.purchases.price(forStock: highlighted.id))",
+                    style: .secondary
+                ) {
                     Task {
                         if await flow.purchase({ try await env.purchases.purchase(stockID: highlighted.id) }) { dismiss() }
                     }

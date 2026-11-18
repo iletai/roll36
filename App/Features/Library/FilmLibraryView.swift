@@ -93,7 +93,10 @@ struct FilmLibraryView: View {
     private var footer: some View {
         VStack(spacing: Theme.spacingS) {
             if model.showsUnlockAll {
-                PrimaryButton(title: "Unlock all \(FilmCatalog.all.count) stocks — \(env.purchases.fullUnlockPrice)", systemImage: "lock.open") {
+                PrimaryButton(
+                    title: "Unlock all \(FilmCatalog.all.count) stocks — \(env.purchases.fullUnlockPrice)",
+                    systemImage: "lock.open"
+                ) {
                     showsPaywall = true
                 }
                 .accessibilityIdentifier("library.unlockAll")

@@ -732,6 +732,23 @@
         }
       }
     },
+    "Could not load frame" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not load frame"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tải được tấm ảnh"
+          }
+        }
+      }
+    },
     "Could not read the film roll" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -966,6 +983,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tráng ảnh — còn %lld lượt"
+          }
+        }
+      }
+    },
+    "Develop frame — unlock required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Develop frame — unlock required"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráng ảnh — cần mở khóa"
           }
         }
       }
@@ -1671,6 +1705,23 @@
         }
       }
     },
+    "Locked stock — tap Develop to unlock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked stock — tap Develop to unlock"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phim đã khóa — nhấn Tráng để mở khóa"
+          }
+        }
+      }
+    },
     "Night" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2045,6 +2096,23 @@
         }
       }
     },
+    "Retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thử lại"
+          }
+        }
+      }
+    },
     "Roll" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2389,6 +2457,23 @@
         }
       }
     },
+    "Try another stock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try another stock"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thử loại phim khác"
+          }
+        }
+      }
+    },
     "Temp" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2559,6 +2644,23 @@
         }
       }
     },
+    "Unable to load" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to load"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tải được"
+          }
+        }
+      }
+    },
     "Unlock all %lld stocks — %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2658,6 +2760,227 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Film recipe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film recipe"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông số tráng phim"
+          }
+        }
+      }
+    },
+    "Cycle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycle"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chu kỳ"
+          }
+        }
+      }
+    },
+    "ORIGINAL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ORIGINAL"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ẢNH GỐC"
+          }
+        }
+      }
+    },
+    "FILM LOOK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FILM LOOK"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MÀU FILM"
+          }
+        }
+      }
+    },
+    "PICK A PHOTO" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PICK A PHOTO"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CHỌN ẢNH TỪ MÁY"
+          }
+        }
+      }
+    },
+    "Tap here to choose a photo to apply a film look" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap here to choose a photo to apply a film look"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chạm vào đây để chọn ảnh cần áp màu phim"
+          }
+        }
+      }
+    },
+    "PICK NOW" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PICK NOW"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CHỌN ẢNH NGAY"
+          }
+        }
+      }
+    },
+    "Hold to compare" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to compare"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giữ để so sánh"
+          }
+        }
+      }
+    },
+    "Film is loaded in the camera. Change stock after this roll." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film is loaded in the camera. Change stock after this roll."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phim đang nạp trong máy. Đổi stock sau khi hết cuộn."
+          }
+        }
+      }
+    },
+    "Film loaded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film loaded"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phim đã nạp"
+          }
+        }
+      }
+    },
+    "Change photo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change photo"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đổi ảnh khác"
+          }
+        }
+      }
+    },
+    "Focus and exposure" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus and exposure"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lấy nét và phơi sáng"
+          }
+        }
+      }
+    },
+    "Tap to focus. Drag up or down to adjust exposure." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to focus. Drag up or down to adjust exposure."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chạm để lấy nét. Kéo lên hoặc xuống để chỉnh độ sáng."
           }
         }
       }
