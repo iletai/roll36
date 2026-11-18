@@ -3,7 +3,9 @@ import Observation
 import SwiftUI
 import UIKit
 
-/// State machine of the Import screen (PLAN §11): photo -> stock -> low-res preview -> full-res develop.
+/// State machine of the Import screen (PLAN §11): photo -> stock -> preview -> develop.
+/// `@MainActor` so all state mutations are isolated to the main actor (Swift 6 strict concurrency).
+@MainActor
 @Observable
 final class ImportViewModel {
     enum Phase: Equatable {
@@ -19,6 +21,8 @@ final class ImportViewModel {
     private(set) var stock: FilmProfile
     /// Original downscaled photo until the first developed preview arrives, then the preview.
     private(set) var image: UIImage?
+    /// Retained downscaled copy of the original unedited photo for instant Before/After comparison.
+    private(set) var originalThumbnail: UIImage?
     private(set) var isPreviewing = false
     private(set) var errorMessage: LocalizedStringKey?
     /// Free imports left; nil when unlimited.
@@ -27,6 +31,10 @@ final class ImportViewModel {
 
     private let env: AppEnvironment
     private var original: Data?
+
+    /// Generation counter: each `load()` and `startPreview()` increments it.
+    /// After every `await`, code checks whether the generation is still current before mutating state.
+    @ObservationIgnored private var generation = 0
     @ObservationIgnored private(set) var previewTask: Task<Void, Never>?
 
     private static let previewDimension: CGFloat = 1080
@@ -51,16 +59,24 @@ final class ImportViewModel {
         errorMessage = "Could not load that photo."
     }
 
+    /// Loads a picked photo. Uses a generation counter so rapid picks or cancellation
+    /// can never overwrite state from a stale task.
     func load(_ data: Data) async {
+        generation &+= 1
+        let gen = generation
         errorMessage = nil
         original = data
         guard let thumbnail = await Self.downscaled(data, maxDimension: Self.previewDimension) else {
+            guard gen == generation else { return }
             original = nil
+            originalThumbnail = nil
             image = nil
             phase = .empty
             loadFailed()
             return
         }
+        guard gen == generation else { return }
+        originalThumbnail = thumbnail
         image = thumbnail
         phase = .ready
         startPreview()
@@ -73,10 +89,21 @@ final class ImportViewModel {
         startPreview()
     }
 
+    /// Returns to the selection state after developing, keeping the same source photo
+    /// so the user can try another stock without re-importing.
+    func tryAnotherStock() {
+        guard original != nil else { return }
+        phase = .ready
+        startPreview()
+    }
+
     /// Back to the empty state for the next photo.
     func reset() {
+        generation &+= 1
         previewTask?.cancel()
+        previewTask = nil
         original = nil
+        originalThumbnail = nil
         image = nil
         isPreviewing = false
         errorMessage = nil
@@ -90,6 +117,9 @@ final class ImportViewModel {
             paywall = PaywallRequest(stockID: stock.id)
             return
         }
+        generation &+= 1
+        previewTask?.cancel()
+        isPreviewing = false
         phase = .developing
         errorMessage = nil
         do {
@@ -108,18 +138,28 @@ final class ImportViewModel {
     // MARK: - Preview
 
     /// Cancels the previous preview so rapid stock changes only render the last one.
+    /// Uses a generation counter: after every `await`, the task checks whether it is still current.
     private func startPreview() {
         previewTask?.cancel()
+        generation &+= 1
+        let gen = generation
         guard let original else { return }
         let profile = stock
         isPreviewing = true
-        previewTask = Task {
-            defer { if !Task.isCancelled { isPreviewing = false } }
+        previewTask = Task { [weak self] in
+            guard let self else { return }
+            defer {
+                if gen == self.generation { self.isPreviewing = false }
+            }
             do {
+                try Task.checkCancellation()
                 try await Task.sleep(for: Self.debounce)
-                let data = try await env.filmEngine.preview(original, profile: profile, maxDimension: Self.previewDimension)
-                guard !Task.isCancelled, let developed = await Self.downscaled(data, maxDimension: Self.previewDimension) else { return }
-                image = developed
+                guard gen == self.generation, !Task.isCancelled else { return }
+                let data = try await self.env.filmEngine.preview(original, profile: profile, maxDimension: Self.previewDimension)
+                guard gen == self.generation, !Task.isCancelled else { return }
+                guard let developed = await Self.downscaled(data, maxDimension: Self.previewDimension) else { return }
+                guard gen == self.generation else { return }
+                self.image = developed
             } catch {
                 // Cancelled or failed: keep whatever is on screen; developing reports its own errors.
             }
@@ -127,7 +167,7 @@ final class ImportViewModel {
     }
 
     /// Decodes off the main actor with ImageIO so a full-resolution photo is never decoded on it.
-    @concurrent private static func downscaled(_ data: Data, maxDimension: CGFloat) async -> UIImage? {
+    nonisolated static func downscaled(_ data: Data, maxDimension: CGFloat) async -> UIImage? {
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,

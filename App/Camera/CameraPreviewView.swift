@@ -11,12 +11,24 @@ struct CameraPreviewView: View {
         if let live = service as? LiveCameraService {
             LivePreview(service: live)
         } else {
-            ZStack {
-                Color(red: 0x17 / 255, green: 0x14 / 255, blue: 0x0F / 255)
-                Text("NO CAMERA (SIMULATOR)")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Color(red: 0x8A / 255, green: 0x80 / 255, blue: 0x72 / 255))
-            }
+            #if DEBUG
+                if DemoSeed.isEnabled, let photo = DemoSeed.previewImage {
+                    Color.clear.overlay { Image(uiImage: photo).resizable().scaledToFill() }.clipped()
+                } else {
+                    placeholder
+                }
+            #else
+                placeholder
+            #endif
+        }
+    }
+
+    private var placeholder: some View {
+        ZStack {
+            Color(red: 0x17 / 255, green: 0x14 / 255, blue: 0x0F / 255)
+            Text("NO CAMERA (SIMULATOR)")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color(red: 0x8A / 255, green: 0x80 / 255, blue: 0x72 / 255))
         }
     }
 }

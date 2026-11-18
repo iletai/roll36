@@ -2,7 +2,7 @@ import XCTest
 
 /// Library to purchase surfaces. Asserts on identifiers only: StoreKit products may not load in a test run.
 /// Not MainActor: default isolation would change the XCTestCase inits, which are nonisolated.
-nonisolated final class PaywallUITests: XCTestCase {
+final nonisolated class PaywallUITests: XCTestCase {
     @MainActor
     override func setUp() async throws {
         continueAfterFailure = false

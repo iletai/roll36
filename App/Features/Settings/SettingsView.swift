@@ -9,11 +9,20 @@ struct SettingsView: View {
     @State private var model = SettingsModel()
     @State private var restore = PurchaseFlow()
     @State private var confirmsDelete = false
+    @State private var showsGuide = false
+
+    @AppStorage("camera_default_zoom") private var defaultZoom = "28mm"
+    @AppStorage("camera_target_fps") private var targetFPS = 60
+    @AppStorage("camera_frame_aspect") private var frameAspect = "3:2"
+    @AppStorage("camera_haptics") private var cameraHaptics = true
+    @AppStorage("camera_show_grid") private var cameraShowGrid = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.spacingL) {
+                    guide
+                    camera
                     purchases
                     language
                     legal
@@ -32,8 +41,119 @@ struct SettingsView: View {
                 }
             }
         }
+        .sheet(isPresented: $showsGuide) {
+            GuideView()
+        }
         .preferredColorScheme(.dark)
         .tint(Theme.amber)
+    }
+
+    private var guide: some View {
+        section("Guide") {
+            Button {
+                showsGuide = true
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("User Guide").monoLabel(size: 12, color: Theme.text)
+                        Text("Hướng dẫn & Quy trình nhiếp ảnh analog").bodyText(color: Theme.muted).font(.footnote)
+                    }
+                    Spacer()
+                    Image(systemName: "book.pages")
+                        .foregroundStyle(Theme.amber)
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(Theme.muted)
+                }
+                .padding(Theme.spacingM)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("User Guide")
+        }
+    }
+
+    private var camera: some View {
+        section("Camera") {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Default Zoom").monoLabel(size: 12, color: Theme.text)
+                    Text("Ống kính mặc định").bodyText(color: Theme.muted).font(.footnote)
+                }
+                Spacer()
+                Picker("Default Zoom", selection: $defaultZoom) {
+                    ForEach(CameraDefaultZoom.allCases) { zoom in
+                        Text(zoom.title).tag(zoom.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(Theme.amber)
+            }
+            .padding(Theme.spacingM)
+
+            divider
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Viewfinder Rate").monoLabel(size: 12, color: Theme.text)
+                    Text("Tốc độ khung hình").bodyText(color: Theme.muted).font(.footnote)
+                }
+                Spacer()
+                Picker("Viewfinder Rate", selection: $targetFPS) {
+                    ForEach(CameraTargetFPS.allCases) { fps in
+                        Text(fps.title).tag(fps.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(Theme.amber)
+            }
+            .padding(Theme.spacingM)
+
+            divider
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Frame Size").monoLabel(size: 12, color: Theme.text)
+                    Text("Tỉ lệ khung hình").bodyText(color: Theme.muted).font(.footnote)
+                }
+                Spacer()
+                Picker("Frame Size", selection: $frameAspect) {
+                    ForEach(CameraFrameAspect.allCases) { aspect in
+                        Text(aspect.title).tag(aspect.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(Theme.amber)
+            }
+            .padding(Theme.spacingM)
+
+            divider
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Haptic Feedback").monoLabel(size: 12, color: Theme.text)
+                    Text("Phản hồi rung khi chụp").bodyText(color: Theme.muted).font(.footnote)
+                }
+                Spacer()
+                Toggle("", isOn: $cameraHaptics)
+                    .labelsHidden()
+                    .tint(Theme.amber)
+            }
+            .padding(Theme.spacingM)
+
+            divider
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Framing Grid").monoLabel(size: 12, color: Theme.text)
+                    Text("Lưới bố cục 3x3 trong kính ngắm").bodyText(color: Theme.muted).font(.footnote)
+                }
+                Spacer()
+                Toggle("", isOn: $cameraShowGrid)
+                    .labelsHidden()
+                    .tint(Theme.amber)
+            }
+            .padding(Theme.spacingM)
+        }
     }
 
     private var purchases: some View {

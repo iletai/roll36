@@ -47,7 +47,7 @@ struct LocalizationTests {
         }.sorted { $0.key < $1.key }
     }
 
-    nonisolated private static let catalogNames = ["Localizable.xcstrings", "InfoPlist.xcstrings"]
+    private nonisolated static let catalogNames = ["Localizable.xcstrings", "InfoPlist.xcstrings"]
 
     /// Specifier types in order, e.g. "%1$lld of %2$@" -> ["d", "@"]. `%%` is ignored and length modifiers are dropped.
     private static func specifiers(in text: String) -> [String] {

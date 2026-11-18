@@ -1,4 +1,5 @@
 import Observation
+import os
 import SwiftUI
 import UIKit
 
@@ -31,6 +32,12 @@ final class ViewfinderViewModel {
         }
     }
 
+    private struct QueuedFrame {
+        let raw: Data
+        let roll: Roll
+        let profile: FilmProfile
+    }
+
     struct PaywallRequest: Identifiable {
         let id = UUID()
         var stockID: String?
@@ -39,18 +46,28 @@ final class ViewfinderViewModel {
     private(set) var state = State.loading
     /// The active roll, or the newest exposed one while it waits to be developed.
     private(set) var roll: Roll?
+    /// When the roll in the tank is ready; non-nil only if it blocks developing the closed roll (free tier).
+    private(set) var waitingUntil: Date?
     private(set) var exposure: ExposureReadout?
     private(set) var flashMode = FlashMode.auto
     private(set) var lens = Lens.mm35
     /// Bumped after every capture; the view turns it into the black shutter flash.
     private(set) var flashCount = 0
     private(set) var errorMessage: LocalizedStringKey = ""
+    private(set) var notice: LocalizedStringKey?
     var paywall: PaywallRequest?
     var showStockPicker = false
 
     private let env: AppEnvironment
     private let authorize: () async -> CameraAuthorizationStatus
     private var cameraReady = false
+    /// Frames captured but not yet written to the roll (queued + the one being developed).
+    private(set) var pending = 0
+    private var queue: [QueuedFrame] = []
+    private var drainTask: Task<Void, Never>?
+    private var isCapturing = false
+    /// Raw JPEGs held in RAM while waiting for the develop queue; beyond this the shutter waits.
+    private static let maxPending = 3
 
     init(env: AppEnvironment, authorize: (() async -> CameraAuthorizationStatus)? = nil) {
         self.env = env
@@ -67,11 +84,16 @@ final class ViewfinderViewModel {
 
     var taken: Int { roll?.shots.count ?? 0 }
     var capacity: Int { roll?.capacity ?? 36 }
-    var canShoot: Bool { state == .ready }
+    /// Frames shot so far, saved or still developing; drives the frame counter (a number, never an image).
+    var exposedCount: Int { taken + pending }
+    var canShoot: Bool { state == .ready && pending < Self.maxPending && exposedCount < capacity }
     var hasActiveRoll: Bool { state == .ready || state == .saving }
     /// The stock can only be swapped while no roll is in the camera.
     var canChangeStock: Bool { !hasActiveRoll && state != .loading && state != .noPermission }
-    var canFinishEarly: Bool { state == .ready && taken > 0 }
+    /// Waits for the queue: closing the roll while a frame is still being written would lose it.
+    /// A closed roll waits in the Darkroom, so the next one can be loaded right away instead of blocking the camera.
+    var canLoadWhileClosed: Bool { state == .rollFull }
+    var canFinishEarly: Bool { state == .ready && pending == 0 && taken > 0 }
 
     /// Stock of the roll in the camera, else the one that will be loaded next.
     var stock: FilmProfile {
@@ -104,6 +126,7 @@ final class ViewfinderViewModel {
 
     func stop() async {
         cameraReady = false
+        await awaitPending()
         await env.camera.stop()
     }
 
@@ -119,7 +142,12 @@ final class ViewfinderViewModel {
 
     func refresh() {
         do {
-            roll = try env.repository.currentRoll() ?? env.repository.rolls().first { $0.state() == .exposed }
+            let rolls = try env.repository.rolls()
+            roll = try env.repository.currentRoll() ?? rolls.first { $0.state() == .exposed }
+            // A free user can only develop one roll at a time: remember when the tank frees up.
+            waitingUntil = env.entitlements.canDevelopInParallel ? nil : rolls.compactMap {
+                if case let .developing(_, readyAt) = $0.state() { readyAt } else { nil }
+            }.min()
         } catch {
             fail("Could not read the film roll")
             return
@@ -155,22 +183,57 @@ final class ViewfinderViewModel {
 
     // MARK: - Shutter flow (PLAN §9.4)
 
+    /// Releases the shutter as soon as the sensor returns the raw frame; developing and saving run on a
+    /// serial queue (order and `index = shots.count` stay correct). The roll capacity counts pending frames.
     func shutter() async {
-        guard state == .ready, let roll, case let .active(remaining) = roll.state(), remaining > 0 else { return }
+        guard state == .ready, !isCapturing, pending < Self.maxPending, let roll,
+              case let .active(remaining) = roll.state(), remaining > pending else { return }
+        isCapturing = true
         state = .saving
         Haptics.shutter()
+        let raw: Data
         do {
-            let raw = try await env.camera.capture()
-            flashCount += 1
-            let profile = FilmCatalog.profile(id: roll.stockID) ?? FilmCatalog.free
-            let out = try await env.filmEngine.process(raw, profile: profile)
-            _ = try await env.repository.appendShot(jpeg: out, to: roll)
+            raw = try await env.camera.capture()
         } catch {
+            isCapturing = false
             fail("Could not save the frame")
             return
         }
-        state = .ready
-        refresh()
+        flashCount += 1
+        pending += 1
+        queue.append(QueuedFrame(raw: raw, roll: roll, profile: FilmCatalog.profile(id: roll.stockID) ?? FilmCatalog.free))
+        isCapturing = false
+        if state == .saving, pending < Self.maxPending { state = .ready }
+        startDrain()
+    }
+
+    /// Suspends until every captured frame is saved (or has failed).
+    func awaitPending() async {
+        await drainTask?.value
+    }
+
+    private func startDrain() {
+        guard drainTask == nil else { return }
+        // Keeps running if the screen goes away, and asks iOS for time if the app backgrounds meanwhile.
+        let app = UIApplication.shared
+        let background = app.beginBackgroundTask(withName: "develop-queue", expirationHandler: nil)
+        drainTask = Task {
+            while !queue.isEmpty {
+                let job = queue.removeFirst()
+                do {
+                    let out = try await env.filmEngine.process(job.raw, profile: job.profile)
+                    _ = try await env.repository.appendShot(jpeg: out, to: job.roll)
+                } catch {
+                    Log.camera.error("Queued frame failed: \(error)")
+                    fail("Could not save the frame")
+                }
+                pending -= 1
+                if state == .saving { state = .ready }
+                refresh()
+            }
+            drainTask = nil
+            app.endBackgroundTask(background)
+        }
     }
 
     func finishEarly() {
@@ -183,11 +246,21 @@ final class ViewfinderViewModel {
         do {
             try env.repository.startDeveloping(roll, canDevelopInParallel: env.entitlements.canDevelopInParallel)
             refresh()
+            notice = "Roll sent to Darkroom to develop"
         } catch RollRepository.RollError.developingLimitReached {
             paywall = PaywallRequest()
         } catch {
             fail("Could not start developing")
         }
+    }
+
+    /// The stock is baked in when a frame is shot, so it stays fixed until the roll ends.
+    func explainLockedStock() {
+        notice = "Film is loaded in the camera. Change stock after this roll."
+    }
+
+    func dismissNotice() {
+        notice = nil
     }
 
     /// Loads the selected stock into a new roll; a locked stock opens the paywall instead.

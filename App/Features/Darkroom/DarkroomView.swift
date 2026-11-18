@@ -9,11 +9,18 @@ struct DarkroomView: View {
     @State private var openedRoll: Roll?
     @State private var showImport = false
     @State private var showPaywall = false
+    var isTabActive: Bool = true
 
     var body: some View {
         NavigationStack {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                content(now: context.date)
+            Group {
+                if isTabActive {
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        content(now: context.date)
+                    }
+                } else {
+                    content(now: .now)
+                }
             }
             .background(Theme.bg)
             .toolbar(.hidden, for: .navigationBar)
@@ -142,4 +149,3 @@ struct DarkroomView: View {
 #Preview {
     DarkroomView().environment(AppEnvironment.preview())
 }
-

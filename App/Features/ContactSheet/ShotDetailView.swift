@@ -78,13 +78,30 @@ struct ShotDetailView: View {
         }
         do {
             let data = try await exportable(shot).jpeg()
-            try await PHPhotoLibrary.shared().performChanges {
-                PHAssetCreationRequest.forAsset().addResource(with: .photo, data: data, options: nil)
+            let result = await Self.performPhotosSave(data: data)
+            switch result {
+            case .success:
+                notice = "Saved to Photos."
+            case let .failure(error):
+                Log.app.error("save to Photos failed: \(error)")
+                notice = "Couldn't save the frame."
             }
-            notice = "Saved to Photos."
         } catch {
             Log.app.error("save to Photos failed: \(error)")
             notice = "Couldn't save the frame."
+        }
+    }
+
+    /// Runs `PHPhotoLibrary.performChanges` on its own queue, isolated from MainActor.
+    /// Returns a `Result` so the caller can update UI on MainActor.
+    private nonisolated static func performPhotosSave(data: Data) async -> Result<Void, Error> {
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetCreationRequest.forAsset().addResource(with: .photo, data: data, options: nil)
+            }
+            return .success(())
+        } catch {
+            return .failure(error)
         }
     }
 }
@@ -101,29 +118,68 @@ private nonisolated struct ExportableFrame: Transferable {
     }
 
     func jpeg() async throws -> Data {
-        let data = try await imageStore.data(filename)
+        guard let data = await imageStore.data(filename) else {
+            throw ImageStore.StoreError.readFailed
+        }
         return watermark ? try await filmEngine.watermarked(data) : data
     }
 }
 
-/// One page: loads the full-size JPEG and downsamples it for display.
+/// One page: loads the full-size JPEG, downsamples it for display, and supports pinch-to-zoom.
 private struct FullFrame: View {
     let shot: Shot
     let imageStore: ImageStore
+
     @State private var image: UIImage?
+    @State private var loadFailed = false
+    @State private var loadToken = 0
+
+    // Zoom state
+    @State private var scale: CGFloat = 1
+    @State private var lastScale: CGFloat = 1
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+
+    fileprivate static let maxScale: CGFloat = 5
 
     var body: some View {
         Group {
             if let image {
-                Image(uiImage: image).resizable().scaledToFit()
+                ZoomableImage(
+                    image: image,
+                    scale: $scale,
+                    lastScale: $lastScale,
+                    offset: $offset,
+                    lastOffset: $lastOffset,
+                    resetZoom: resetZoom
+                )
+            } else if loadFailed {
+                LoadFailureView {
+                    loadFailed = false
+                    loadToken += 1
+                }
             } else {
                 ProgressView().tint(Theme.muted)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: shot.id) {
-            guard let data = try? await imageStore.data(shot.imageFilename) else { return }
+        .task(id: "\(shot.id)-\(loadToken)") {
+            guard let data = await imageStore.data(shot.imageFilename) else {
+                Log.storage.error("FullFrame load failed for \(shot.imageFilename)")
+                loadFailed = true
+                return
+            }
             image = await Self.downsample(data)
+            if image == nil { loadFailed = true }
+        }
+    }
+
+    private func resetZoom() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            scale = 1
+            lastScale = 1
+            offset = .zero
+            lastOffset = .zero
         }
     }
 
@@ -139,5 +195,90 @@ private struct FullFrame: View {
               let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
         else { return nil }
         return UIImage(cgImage: cgImage)
+    }
+}
+
+/// Pinch-to-zoom + drag + double-tap-to-reset, clamped so the image stays on-screen.
+private struct ZoomableImage: View {
+    let image: UIImage
+    @Binding var scale: CGFloat
+    @Binding var lastScale: CGFloat
+    @Binding var offset: CGSize
+    @Binding var lastOffset: CGSize
+    let resetZoom: () -> Void
+
+    var body: some View {
+        GeometryReader { geo in
+            let clamped = clampedOffset(in: geo.size)
+            let base = Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .scaleEffect(scale)
+                .offset(clamped)
+                .gesture(magnification)
+                .onTapGesture(count: 2) { resetZoom() }
+
+            if scale > 1.0 {
+                base.gesture(drag(in: geo.size))
+            } else {
+                base
+            }
+        }
+    }
+
+    private var magnification: some Gesture {
+        MagnificationGesture()
+            .onChanged { value in
+                let new = lastScale * value
+                scale = min(max(1, new), FullFrame.maxScale)
+            }
+            .onEnded { _ in
+                if scale < 1.1 {
+                    resetZoom()
+                } else {
+                    lastScale = scale
+                }
+            }
+    }
+
+    private func drag(in _: CGSize) -> some Gesture {
+        DragGesture()
+            .onChanged { value in
+                offset = CGSize(
+                    width: lastOffset.width + value.translation.width,
+                    height: lastOffset.height + value.translation.height
+                )
+            }
+            .onEnded { _ in
+                lastOffset = offset
+            }
+    }
+
+    /// Keeps the image from being dragged more than half its scaled size beyond the viewport.
+    private func clampedOffset(in size: CGSize) -> CGSize {
+        guard scale > 1 else { return .zero }
+        let maxX = size.width * (scale - 1) / 2
+        let maxY = size.height * (scale - 1) / 2
+        return CGSize(
+            width: min(max(offset.width, -maxX), maxX),
+            height: min(max(offset.height, -maxY), maxY)
+        )
+    }
+}
+
+/// Error placeholder shown when a full-frame JPEG cannot be loaded.
+private struct LoadFailureView: View {
+    let retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: Theme.spacingS) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.title2)
+                .foregroundStyle(Theme.red)
+            Text("Could not load frame")
+                .monoLabel(size: 12, color: Theme.red)
+            Button("Retry", action: retry)
+                .monoLabel(size: 12, color: Theme.amber)
+        }
     }
 }

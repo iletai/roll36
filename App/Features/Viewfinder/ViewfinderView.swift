@@ -1,14 +1,16 @@
 import SwiftUI
 
 /// Camera tab (PLAN §13.1). The view model needs the environment, so it is built on first appearance.
+/// `isTabActive` is false when another tab is selected; the camera pauses while hidden and resumes on return.
 struct ViewfinderView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var model: ViewfinderViewModel?
+    var isTabActive: Bool = true
 
     var body: some View {
         Group {
             if let model {
-                ViewfinderContent(model: model)
+                ViewfinderContent(model: model, isTabActive: isTabActive)
             } else {
                 Theme.bg
             }
@@ -25,6 +27,11 @@ private struct ViewfinderContent: View {
     @State private var showSettings = false
     @State private var confirmFinish = false
     @State private var flashVisible = false
+    @AppStorage("camera_show_grid") private var showGrid = false
+    var isTabActive: Bool
+
+    /// Camera runs only while the tab is active AND the app is in the foreground; cancellation stops it.
+    private var cameraShouldRun: Bool { isTabActive && scenePhase == .active }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,9 +42,8 @@ private struct ViewfinderContent: View {
             controls
         }
         .background(Theme.bg.ignoresSafeArea())
-        // Camera runs only while the screen is visible and the app is active; cancellation stops it.
-        .task(id: scenePhase) {
-            guard scenePhase == .active else { return }
+        .task(id: cameraShouldRun) {
+            guard cameraShouldRun else { return }
             await model.run()
         }
         .task(id: model.flashCount) {
@@ -45,6 +51,13 @@ private struct ViewfinderContent: View {
             flashVisible = true
             try? await Task.sleep(for: .milliseconds(120))
             flashVisible = false
+        }
+        .task(id: model.notice) {
+            guard model.notice != nil else { return }
+            try? await Task.sleep(for: .seconds(3))
+            withAnimation(.easeInOut(duration: 0.25)) {
+                model.dismissNotice()
+            }
         }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $model.showStockPicker) { StockPickerView(model: model, selectedID: env.selectedStockID) }
@@ -81,7 +94,7 @@ private struct ViewfinderContent: View {
             .accessibilityLabel(Text("Flash"))
             .accessibilityValue(flashTitle)
 
-            RollCounter(taken: model.taken, capacity: model.capacity)
+            RollCounter(taken: model.exposedCount, capacity: model.capacity)
                 .fixedSize()
 
             Button { showSettings = true } label: {
@@ -127,6 +140,16 @@ private struct ViewfinderContent: View {
                 permissionNotice
             } else {
                 CameraPreviewView(service: env.camera)
+                // Approximate look of the loaded stock; the real grade is applied when the frame is developed.
+                Color(hex: model.stock.swatchHex).opacity(0.3).blendMode(.softLight).allowsHitTesting(false)
+                if showGrid { GridOverlay() }
+                HorizonLevel()
+                if model.canShoot {
+                    FocusOverlay(
+                        onFocus: { point in Task { await env.camera.focus(atNormalizedPoint: point) } },
+                        onExposureBias: { ev in Task { await env.camera.setExposureBias(ev) } }
+                    )
+                }
                 FramingBrackets()
                     .stroke(Theme.amber, lineWidth: 1.5)
                     .padding(16)
@@ -139,6 +162,37 @@ private struct ViewfinderContent: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.surface)
         .clipped()
+        .overlay(alignment: .top) {
+            if let notice = model.notice {
+                noticeBanner(notice)
+                    .padding(.top, Theme.spacingM)
+            }
+        }
+    }
+
+    private func noticeBanner(_ text: LocalizedStringKey) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "flask.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.amber)
+            Text(text)
+                .monoLabel(size: 12, color: Theme.text)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Theme.surface.opacity(0.95))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.cardRadius)
+                .strokeBorder(Theme.amber.opacity(0.6), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.5), radius: 8, y: 4)
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                model.dismissNotice()
+            }
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     @ViewBuilder
@@ -148,8 +202,17 @@ private struct ViewfinderContent: View {
             ProgressView().tint(Theme.amber)
         case .rollFull:
             dimmed {
-                Text("Roll is full").monoDisplay(size: 24)
-                PrimaryButton(title: "Develop now", systemImage: "flask") { model.developNow() }
+                if model.taken < model.capacity {
+                    Text("Roll closed (\(model.taken)/\(model.capacity))").monoDisplay(size: 24)
+                } else {
+                    Text("Roll is full").monoDisplay(size: 24)
+                }
+                developControl
+                if model.canLoadWhileClosed {
+                    PrimaryButton(title: "Load \(model.stock.displayName)", systemImage: "film", style: .secondary) {
+                        model.loadSelectedStock()
+                    }
+                }
             }
         case .noActiveRoll:
             dimmed {
@@ -157,6 +220,21 @@ private struct ViewfinderContent: View {
             }
         default:
             EmptyView()
+        }
+    }
+
+    /// "Develop now", or the countdown of the roll in the tank when the free tier cannot develop in parallel.
+    private var developControl: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            if let readyAt = model.waitingUntil, readyAt > context.date {
+                VStack(spacing: 6) {
+                    Text("Waiting for previous roll").monoLabel(size: 12, color: Theme.amber)
+                    Text("Remaining \(DevelopingTicker.remainingText(until: readyAt, now: context.date))")
+                        .monoLabel(size: 12, color: Theme.text)
+                }
+            } else {
+                PrimaryButton(title: "Develop now", systemImage: "flask") { model.developNow() }
+            }
         }
     }
 
@@ -183,13 +261,11 @@ private struct ViewfinderContent: View {
 
     private var stockRow: some View {
         HStack {
-            if model.canChangeStock {
-                Button { model.showStockPicker = true } label: { stockChip }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(Text("Choose film stock"))
-            } else {
-                stockChip
-            }
+            Button {
+                if model.canChangeStock { model.showStockPicker = true } else { model.explainLockedStock() }
+            } label: { stockChip }
+                .buttonStyle(.plain)
+                .accessibilityHint(model.canChangeStock ? Text("Choose film stock") : Text("Film loaded"))
             Spacer(minLength: Theme.spacingS)
             lensChips
         }
@@ -210,6 +286,9 @@ private struct ViewfinderContent: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: stock.displayName).monoLabel(size: 12, color: Theme.text)
                 Text(verbatim: "\(stock.frames) EXP · \(stock.processCode)").monoLabel(size: 9)
+            }
+            if !model.canChangeStock {
+                Image(systemName: "lock.fill").font(.system(size: 10)).foregroundStyle(Theme.muted)
             }
         }
         .padding(8)
@@ -254,33 +333,40 @@ private struct ViewfinderContent: View {
     /// Frame number only: a captured frame is never shown before it is developed (PLAN §9.4).
     private var frameBadge: some View {
         VStack(spacing: 6) {
-            Text(verbatim: "#\(model.taken)")
+            Text(verbatim: "#\(model.exposedCount)")
                 .monoLabel(size: 14, color: Theme.text)
                 .frame(width: 56, height: 56)
                 .monoBox()
             Text("Roll").monoLabel(size: 10)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Frame \(model.taken)"))
+        .accessibilityLabel(Text("Frame \(model.exposedCount)"))
     }
 
     @ViewBuilder
     private var finishButton: some View {
         if model.canFinishEarly {
             Button { confirmFinish = true } label: {
-                Text("Finish early")
-                    .monoLabel(size: 10, color: Theme.text)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 64, height: 56)
-                    .monoBox()
+                VStack(spacing: 4) {
+                    Image(systemName: "film")
+                        .font(.system(size: 16))
+                        .foregroundStyle(Theme.amber)
+                    Text("Finish early")
+                        .monoLabel(size: 10, color: Theme.text)
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 10)
+                .frame(height: 56)
+                .monoBox()
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text("Finish roll early"))
         }
     }
 }
 
 /// Four amber corner brackets, 20pt long.
-private struct FramingBrackets: Shape {
+private nonisolated struct FramingBrackets: Shape {
     func path(in rect: CGRect) -> Path {
         let length: CGFloat = 20
         var path = Path()

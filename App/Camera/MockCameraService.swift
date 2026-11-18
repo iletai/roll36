@@ -12,6 +12,9 @@ actor MockCameraService: CameraService {
     nonisolated let isAvailable = false
     private var isRunning = false
     private var frame = 0
+    /// Recorded for tests.
+    private(set) var focusPoints: [CGPoint?] = []
+    private(set) var exposureBiases: [Double] = []
 
     func start() async throws {
         isRunning = true
@@ -23,6 +26,10 @@ actor MockCameraService: CameraService {
 
     func capture() async throws -> Data {
         guard isRunning else { throw CameraError.unavailable }
+        #if DEBUG
+            // Screenshot mode: a real-looking photo instead of the synthetic scene (e.g. for `-seedImport`).
+            if DemoSeed.isEnabled, let data = DemoSeed.photoData(6) { return data }
+        #endif
         frame += 1
         guard let data = Self.render(frame: frame) else { throw CameraError.captureFailed }
         return data
@@ -31,6 +38,14 @@ actor MockCameraService: CameraService {
     func setFlashMode(_: FlashMode) async {}
 
     func setZoom(_: Double) async {}
+
+    func focus(atNormalizedPoint point: CGPoint?) async {
+        focusPoints.append(point)
+    }
+
+    func setExposureBias(_ ev: Double) async {
+        exposureBiases.append(min(max(ev, ExposureBias.range.lowerBound), ExposureBias.range.upperBound))
+    }
 
     func exposureReadout() async -> ExposureReadout? {
         ExposureReadout(shutterSeconds: 1.0 / 500, aperture: 2.8, iso: 400)

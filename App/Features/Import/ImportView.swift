@@ -28,11 +28,33 @@ private struct ImportContent: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.spacingL) {
                     introLine
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
-                        NegativeFrame(image: model.image, filmName: model.stock.displayName, isBusy: model.isPreviewing)
+                    if model.image == nil {
+                        PhotosPicker(selection: $pickerItem, matching: .images) {
+                            NegativeFrame(
+                                image: nil,
+                                originalImage: nil,
+                                filmName: model.stock.displayName,
+                                isBusy: model.isPreviewing
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens your photo library")
+                    } else {
+                        VStack(alignment: .trailing, spacing: 8) {
+                            NegativeFrame(
+                                image: model.image,
+                                originalImage: model.originalThumbnail,
+                                filmName: model.stock.displayName,
+                                isBusy: model.isPreviewing
+                            )
+
+                            PhotosPicker(selection: $pickerItem, matching: .images) {
+                                ChangePhotoBadge()
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Change photo")
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens your photo library")
                     emulsionSelector
                     calibrationMatrix
                     if let message = model.errorMessage {
@@ -53,7 +75,7 @@ private struct ImportContent: View {
                 model.loadFailed()
             }
         }
-        .onChange(of: env.entitlements.isImportUnlimited) { model.refreshQuota() }
+        .onChange(of: env.entitlements.isImportUnlimited) { _, _ in model.refreshQuota() }
         .sheet(item: $model.paywall) { PaywallView(highlightStockID: $0.stockID) }
         #if DEBUG
             .task { await seedIfRequested() }
@@ -119,29 +141,46 @@ private struct ImportContent: View {
     private var calibrationMatrix: some View {
         VStack(alignment: .leading, spacing: Theme.spacingS) {
             HStack {
-                Text("Chemical calibration matrix").monoLabel(size: 11, color: Theme.text)
+                HStack(spacing: 6) {
+                    Image(systemName: "flask")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Theme.amber)
+                    Text("Film recipe").monoLabel(size: 11, color: Theme.text)
+                }
                 Spacer()
-                Text("Bath 01 [standard]").monoLabel(size: 10, color: Theme.amber)
+                Text(model.stock.processCode)
+                    .monoLabel(size: 10, color: Theme.amber)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .monoBox(fill: Theme.surface, radius: 3)
             }
-            HStack(spacing: Theme.spacingS) {
-                cell("Process", "\(model.stock.processCode) NOM")
+
+            HStack(spacing: 0) {
+                cell("Process", model.stock.processCode)
+                separator
                 cell("Grain", String(format: "%.1f RMS", model.stock.grainIntensity * 10))
+                separator
                 cell("Temp", "38.0°C")
-                cell("Agitation", "30s INT")
+                separator
+                cell("Cycle", "30s INT")
             }
+            .padding(.vertical, 10)
+            .monoBox(fill: Theme.card, radius: Theme.cardRadius)
         }
-        .padding(Theme.spacingS)
-        .monoBox(fill: Theme.bg)
+    }
+
+    private var separator: some View {
+        Rectangle()
+            .fill(Theme.line)
+            .frame(width: Theme.lineWidth, height: 24)
     }
 
     private func cell(_ title: LocalizedStringKey, _ value: String) -> some View {
         VStack(spacing: 4) {
-            Text(title).monoLabel(size: 9)
-            Text(verbatim: value).monoLabel(size: 11, color: Theme.amber).lineLimit(1).minimumScaleFactor(0.6)
+            Text(title).monoLabel(size: 9, color: Theme.muted)
+            Text(verbatim: value).monoLabel(size: 11, color: Theme.amber).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, Theme.spacingS)
-        .monoBox(fill: Theme.surface)
         .accessibilityElement(children: .combine)
     }
 
@@ -150,6 +189,9 @@ private struct ImportContent: View {
             VStack(spacing: Theme.spacingS) {
                 Label("Frame developed", systemImage: "checkmark.circle")
                     .monoLabel(size: 12, color: Theme.green)
+                PrimaryButton(title: "Try another stock", systemImage: "arrow.triangle.2.circlepath") {
+                    model.tryAnotherStock()
+                }
                 PrimaryButton(title: "Import another", systemImage: "photo.badge.plus") {
                     pickerItem = nil
                     model.reset()
@@ -157,16 +199,27 @@ private struct ImportContent: View {
                 PrimaryButton(title: "Close", style: .secondary, action: close)
             }
         } else {
-            PrimaryButton(title: ctaTitle, systemImage: "flask") {
-                Task { await model.develop() }
+            VStack(spacing: Theme.spacingS) {
+                if model.isStockLocked, model.phase == .ready {
+                    HStack(spacing: Theme.spacingS) {
+                        Image(systemName: "lock.fill").font(.system(size: 11)).foregroundStyle(Theme.amber)
+                        Text("Locked stock — tap Develop to unlock")
+                            .monoLabel(size: 10, color: Theme.amber)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                PrimaryButton(title: ctaTitle, systemImage: model.isStockLocked ? "lock.fill" : "flask") {
+                    Task { await model.develop() }
+                }
+                .disabled(!model.canDevelop)
+                .opacity(model.canDevelop ? 1 : 0.4)
             }
-            .disabled(!model.canDevelop)
-            .opacity(model.canDevelop ? 1 : 0.4)
         }
     }
 
     private var ctaTitle: LocalizedStringKey {
         if model.phase == .developing { return "Developing…" }
+        if model.isStockLocked { return "Develop frame — unlock required" }
         if let left = model.remaining { return "Develop frame — \(left) left" }
         return "Develop frame"
     }
@@ -222,5 +275,19 @@ private struct EmulsionTile: View {
                 .strokeBorder(isSelected ? Theme.amber : Theme.line, lineWidth: isSelected ? 2 : Theme.lineWidth)
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+private struct ChangePhotoBadge: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "photo")
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.amber)
+            Text("Change photo").monoLabel(size: 11, color: Theme.amber)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .monoBox()
     }
 }

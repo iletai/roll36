@@ -57,11 +57,11 @@ struct LibraryTests {
             Issue.record("free stock that is not selected must be .owned")
             return
         }
-        guard case .loaded = model.cardState(for: try #require(FilmCatalog.profile(id: "trix400"))) else {
+        guard case .loaded = try model.cardState(for: #require(FilmCatalog.profile(id: "trix400"))) else {
             Issue.record("selected owned stock must be .loaded")
             return
         }
-        guard case let .locked(price) = model.cardState(for: try #require(FilmCatalog.profile(id: "ektar100"))) else {
+        guard case let .locked(price) = try model.cardState(for: #require(FilmCatalog.profile(id: "ektar100"))) else {
             Issue.record("unowned stock must be .locked")
             return
         }

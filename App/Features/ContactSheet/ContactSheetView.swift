@@ -40,8 +40,10 @@ struct ContactSheetView: View {
                 } else {
                     Text("This roll is not developed yet.").bodyText(color: Theme.muted)
                 }
-                PrimaryButton(title: "Load a new roll", systemImage: "camera", action: loadNewRoll)
-                    .padding(.top, Theme.spacingS)
+                if isViewable, !roll.isImportRoll {
+                    PrimaryButton(title: "Load a new roll", systemImage: "camera", action: loadNewRoll)
+                        .padding(.top, Theme.spacingS)
+                }
             }
             .padding(Theme.spacingM)
         }
@@ -80,6 +82,7 @@ struct ContactSheetView: View {
         }
         do {
             _ = try env.repository.startRoll(stockID: env.selectedStockID)
+            env.selectedTab = .camera
             dismiss()
         } catch {
             Log.app.error("startRoll failed: \(error)")
@@ -93,16 +96,43 @@ struct FrameThumbnail: View {
     let shot: Shot
     let imageStore: ImageStore
 
+    @State private var loadToken = 0
+
     var body: some View {
         Theme.surface
             .overlay {
-                AsyncImage(url: imageStore.thumbnailURL(shot.thumbnailFilename)) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: {
-                    Color.clear
+                AsyncImage(url: imageStore.thumbnailURL(shot.thumbnailFilename)) { phase in
+                    switch phase {
+                    case let .success(image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        ThumbnailFailureView { loadToken += 1 }
+                    case .empty:
+                        ProgressView().tint(Theme.muted)
+                    @unknown default:
+                        ProgressView().tint(Theme.muted)
+                    }
                 }
             }
+            .id(loadToken)
             .clipShape(RoundedRectangle(cornerRadius: 2))
             .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(Color.white, lineWidth: 2))
+    }
+}
+
+/// Placeholder shown when a thumbnail cannot be loaded.
+private struct ThumbnailFailureView: View {
+    let retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "photo")
+                .font(.title3)
+                .foregroundStyle(Theme.red)
+            Text("Unable to load")
+                .monoLabel(size: 8, color: Theme.red)
+            Button("Retry", action: retry)
+                .monoLabel(size: 8, color: Theme.amber)
+        }
     }
 }

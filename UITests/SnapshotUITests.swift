@@ -2,7 +2,7 @@ import XCTest
 
 /// App Store screenshots (`bundle exec fastlane screenshots`); devices/languages in fastlane/Snapfile.
 /// Not MainActor: default isolation would change the XCTestCase inits, which are nonisolated.
-nonisolated final class SnapshotUITests: XCTestCase {
+final nonisolated class SnapshotUITests: XCTestCase {
     @MainActor
     override func setUp() async throws {
         continueAfterFailure = false

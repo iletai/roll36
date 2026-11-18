@@ -33,7 +33,9 @@ final class RollRepository {
         try fetchRolls().first { if case .active = $0.state() { true } else { false } }
     }
 
-    func startRoll(stockID: String, capacity: Int = 36) throws -> Roll {
+    /// `capacity` defaults to the stock's own frame count (24 or 36 exposures).
+    func startRoll(stockID: String, capacity: Int? = nil) throws -> Roll {
+        let capacity = capacity ?? FilmCatalog.profile(id: stockID)?.frames ?? 36
         let roll = Roll(stockID: stockID, capacity: capacity, developDuration: Self.developDuration)
         context.insert(roll)
         try context.save()
@@ -105,9 +107,20 @@ final class RollRepository {
 
     func delete(_ roll: Roll) async throws {
         let files = roll.shots.flatMap { [$0.imageFilename, $0.thumbnailFilename] }
+        // Delete files before removing the model: if context.save fails the files are still orphaned but
+        // the model is intact, and the orphan cleanup will reclaim them. If we deleted the model first and
+        // file deletion failed, we'd lose the reference to retry.
         context.delete(roll)
         try context.save()
         await imageStore.delete(files)
+    }
+
+    /// Removes every file in the Frames directory that is not referenced by any Shot. Safe to call at launch.
+    func cleanupOrphans() async {
+        let descriptor = FetchDescriptor<Shot>()
+        let shots = (try? context.fetch(descriptor)) ?? []
+        let referenced = Set(shots.flatMap { [$0.imageFilename, $0.thumbnailFilename] })
+        await imageStore.cleanupOrphans(referenced: referenced)
     }
 
     func deleteAll() async throws {
