@@ -212,13 +212,14 @@ private struct ImportContent: View {
                     Task { await model.develop() }
                 }
                 .disabled(!model.canDevelop)
-                .opacity(model.canDevelop ? 1 : 0.4)
+                .opacity(model.phase == .empty ? 0.6 : model.canDevelop ? 1 : 0.4)
             }
         }
     }
 
     private var ctaTitle: LocalizedStringKey {
         if model.phase == .developing { return "Developing…" }
+        if model.phase == .empty { return "Pick a photo first" }
         if model.isStockLocked { return "Develop frame — unlock required" }
         if let left = model.remaining { return "Develop frame — \(left) left" }
         return "Develop frame"
@@ -255,7 +256,7 @@ private struct EmulsionTile: View {
             Rectangle().fill(Theme.line).frame(height: Theme.lineWidth)
             Text(verbatim: profile.tagline).monoLabel(size: 9).lineLimit(2, reservesSpace: true)
             HStack {
-                Text(isSelected ? "Ready" : "Standby").monoLabel(size: 9, color: isSelected ? Theme.amber : Theme.muted)
+                Text(isSelected ? "Ready" : "Standby").monoLabel(size: 9, color: isSelected ? Theme.amber : Theme.text.opacity(0.7))
                 Spacer()
                 if isLocked {
                     Image(systemName: "lock.fill").font(.system(size: 10)).foregroundStyle(Theme.muted)
@@ -263,7 +264,7 @@ private struct EmulsionTile: View {
                 } else {
                     Image(systemName: isSelected ? "checkmark.circle" : "circle")
                         .font(.system(size: 12))
-                        .foregroundStyle(isSelected ? Theme.amber : Theme.muted)
+                        .foregroundStyle(isSelected ? Theme.amber : Theme.text.opacity(0.7))
                 }
             }
         }

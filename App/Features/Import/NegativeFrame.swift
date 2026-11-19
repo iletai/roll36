@@ -3,7 +3,7 @@ import SwiftUI
 /// A film negative strip around a photo: sprocket holes above and below, edge text on the rail. Plain shapes only.
 struct NegativeFrame: View {
     let image: UIImage?
-    var originalImage: UIImage? = nil
+    var originalImage: UIImage?
     let filmName: String
     var isBusy = false
 
