@@ -970,6 +970,23 @@
         }
       }
     },
+    "Pick a photo first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a photo first"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn ảnh trước"
+          }
+        }
+      }
+    },
     "Develop frame — %lld left" : {
       "extractionState" : "manual",
       "localizations" : {

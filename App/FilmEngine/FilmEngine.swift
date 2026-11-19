@@ -16,7 +16,7 @@ actor FilmEngine {
     }
 
     private static let previewMaxDimension: CGFloat = 1080
-    private static let jpegQuality = 0.92
+    private static let jpegQuality = 0.95
 
     private let lutCache: LUTCache
     private let context: CIContext
@@ -97,23 +97,23 @@ actor FilmEngine {
         // 2-3. Halation + bloom
         image = HalationRenderer.apply(to: image, profile: profile, scale: scale)
 
-        // 4. Grain
+        // 4. Light sharpen to offset blur softness; before grain so it does not boost the grain contrast
+        let sharpen = CIFilter.sharpenLuminance()
+        sharpen.inputImage = image
+        sharpen.sharpness = 0.3
+        image = (sharpen.outputImage ?? image).cropped(to: extent)
+
+        // 5. Grain
         image = GrainRenderer.apply(to: image, profile: profile, scale: scale)
 
-        // 5. Vignette
+        // 6. Vignette
         let vignette = CIFilter.vignetteEffect()
         vignette.inputImage = image
         vignette.center = CGPoint(x: extent.midX, y: extent.midY)
         vignette.radius = Float(hypot(extent.width, extent.height) / 2) // pixels; half-diagonal gives ~20% corner falloff at intensity 0.2
         vignette.intensity = Float(profile.vignetteIntensity)
         vignette.falloff = 0.5
-        image = vignette.outputImage ?? image
-
-        // 6. Light sharpen to offset blur softness
-        let sharpen = CIFilter.sharpenLuminance()
-        sharpen.inputImage = image
-        sharpen.sharpness = 0.3
-        image = (sharpen.outputImage ?? image).cropped(to: extent)
+        image = (vignette.outputImage ?? image).cropped(to: extent)
 
         let output = try encode(image)
         let elapsed = ContinuousClock.now - start

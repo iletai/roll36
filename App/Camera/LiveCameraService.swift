@@ -51,6 +51,7 @@ actor LiveCameraService: CameraService {
             ? AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
             : AVCapturePhotoSettings()
         settings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
+        settings.photoQualityPrioritization = .quality // multi-frame noise reduction; needs the output max set in configure()
         settings.flashMode = photoOutput.supportedFlashModes.contains(flashMode) ? flashMode : .off
         // Portrait-only app: rotate the back camera's landscape sensor to upright.
         if let connection = photoOutput.connection(with: .video), connection.isVideoRotationAngleSupported(90) {
@@ -141,6 +142,7 @@ actor LiveCameraService: CameraService {
         guard session.canAddInput(input), session.canAddOutput(photoOutput) else { throw CameraError.unavailable }
         session.addInput(input)
         session.addOutput(photoOutput)
+        photoOutput.maxPhotoQualityPrioritization = .quality
         if let largest = device.activeFormat.supportedMaxPhotoDimensions.max(by: { $0.width * $0.height < $1.width * $1.height }) {
             photoOutput.maxPhotoDimensions = largest
         }
