@@ -22,8 +22,8 @@ nonisolated enum GrainRenderer {
             .cropped(to: extent)
 
         // Monochrome, centered on 0.5 (neutral for soft light), deviation scaled by intensity.
-        let k = CGFloat(profile.grainIntensity * 3) // blur flattens the noise; boost to stay visible
-        let w = k / 3
+        // Each output channel sums three random channels, so 0.6 keeps the deviation near the profile intensity.
+        let w = CGFloat(profile.grainIntensity) * 0.6
         let matrix = CIFilter.colorMatrix()
         matrix.inputImage = grains
         let luma = CIVector(x: w, y: w, z: w, w: 0)
@@ -31,7 +31,7 @@ nonisolated enum GrainRenderer {
         matrix.gVector = luma
         matrix.bVector = luma
         matrix.aVector = CIVector(x: 0, y: 0, z: 0, w: 0)
-        let offset = 0.5 * (1 - k)
+        let offset = 0.5 - 1.5 * w // mean of the three-channel sum is 1.5 * w
         matrix.biasVector = CIVector(x: offset, y: offset, z: offset, w: 1)
 
         let blend = CIFilter.softLightBlendMode()

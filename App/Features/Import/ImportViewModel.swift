@@ -119,6 +119,7 @@ final class ImportViewModel {
         }
         generation &+= 1
         previewTask?.cancel()
+        await previewTask?.value // the engine actor cannot cancel a running preview; wait so the final render is not queued behind it
         isPreviewing = false
         phase = .developing
         errorMessage = nil
