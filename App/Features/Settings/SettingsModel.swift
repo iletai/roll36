@@ -37,9 +37,11 @@ enum CameraTargetFPS: Int, CaseIterable, Identifiable {
 }
 
 enum CameraFrameAspect: String, CaseIterable, Identifiable {
+    // swiftlint:disable identifier_name
     case ratio4_3 = "4:3"
     case ratio3_2 = "3:2"
     case ratio1_1 = "1:1"
+    // swiftlint:enable identifier_name
 
     var id: String { rawValue }
     var title: String {
